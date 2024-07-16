@@ -11,7 +11,7 @@ function Form() {
     activities: [],
     dailyUsage: "",
     importance: "",
-    purchaseFactors: [],
+    purchaseFactors: "",
     satisfaction: "",
     onlinePurchaseIssues: "",
     currentBrand: "",
@@ -34,53 +34,175 @@ function Form() {
     }
   };
 
- const handleSubmit = async (event) => {
-   event.preventDefault();
-   if (formData.gender === "" || formData.ageRange === "") {
-     alert("Please fill out all required fields.");
-     return;
-   }
-   const data = {
-     เพศ: formData.gender,
-     ช่วงอายุ: formData.ageRange,
-     สถานภาพ: formData.maritalStatus,
-     "กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ": formData.activities.join(", "), // Join activities into a string
-     "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?": formData.apps.join(", "), // Join apps into a string
-     ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน: formData.dailyUsage,
-     สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร: formData.importance,
-     ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน: formData.currentBrand,
-     ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด:formData.purchaseFactors,
-     ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน: parseInt(formData.satisfaction,10),
-     ปัญหาในการซื้อสมาร์ทโฟนออนไลน์: formData.onlinePurchaseIssues,
-     รายได้ต่อเดือน: formData.income,
-     อาชีพ: formData.occupation,
-   };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-   try {
-    const response = await fetch(
-      "https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (formData.gender === "" || formData.ageRange === "") {
+      alert("Please fill out all required fields.");
+      return;
     }
 
-    const result = await response.json();
-    setPrediction(result.prediction);
-  } catch (error) {
-    console.error("Error:", error);
-    // Show a user-friendly error message
-    alert("An error occurred while processing your request.");
-  }
- };
+    // Convert the form data to the format expected by the model
+    const data = {
+      เพศ_1: formData.gender === "ชาย" ? 1 : 0,
+      เพศ_2: formData.gender === "หญิง" ? 1 : 0,
+      เพศ_3: formData.gender === "อื่นๆ" ? 1 : 0,
+      ช่วงอายุ_1: formData.ageRange === "18-25 ปี" ? 1 : 0,
+      ช่วงอายุ_2: formData.ageRange === "26-32 ปี" ? 1 : 0,
+      ช่วงอายุ_3: formData.ageRange === "33-40 ปี" ? 1 : 0,
+      ช่วงอายุ_4: formData.ageRange === "41-50 ปี" ? 1 : 0,
+      ช่วงอายุ_5: formData.ageRange === "50-60 ปี" ? 1 : 0,
+      ช่วงอายุ_6: formData.ageRange === "60 ปีขึ้นไป" ? 1 : 0,
+      สถานภาพ_1: formData.maritalStatus === "โสด" ? 1 : 0,
+      สถานภาพ_2: formData.maritalStatus === "สมรส" ? 1 : 0,
+      สถานภาพ_3: formData.maritalStatus === "หย่าร้าง" ? 1 : 0,
+      สถานภาพ_4: formData.maritalStatus === "แยกกันอยู่" ? 1 : 0,
+      อาชีพ_1: formData.occupation === "นักเรียน / นักศึกษา" ? 1 : 0,
+      อาชีพ_2: formData.occupation === "พนักงานบริษัทเอกชน" ? 1 : 0,
+      อาชีพ_3: formData.occupation === "พนักงานข้าราชการ" ? 1 : 0,
+      อาชีพ_4: formData.occupation === "พนักงานรัฐวิสาหกิจ" ? 1 : 0,
+      อาชีพ_5: formData.occupation === "พนักงานโรงงานอุตสาหกรรม" ? 1 : 0,
+      อาชีพ_6: formData.occupation === "เจ้าของธุรกิจ/ธุรกิจส่วนตัว" ? 1 : 0,
+      รายได้_1: formData.income === "น้อยกว่า 15,000 บาท" ? 1 : 0,
+      รายได้_2: formData.income === "15,001 - 20,000 บาท" ? 1 : 0,
+      รายได้_3: formData.income === "20,001 - 30,000 บาท" ? 1 : 0,
+      รายได้_4: formData.income === "30,001 - 40,000 บาท" ? 1 : 0,
+      รายได้_5: formData.income === "40,001 - 50,000 บาท" ? 1 : 0,
+      รายได้_6: formData.income === "มากกว่า 50,001 บาทขึ้นไป" ? 1 : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_1": formData.apps.includes(
+        "Instagram"
+      )
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_2": formData.apps.includes("Facebook")
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_3": formData.apps.includes("YouTube")
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_4": formData.apps.includes("Snapchat")
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_5": formData.apps.includes(
+        "Facebook Messenger"
+      )
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_6": formData.apps.includes("Spotify")
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_7": formData.apps.includes("WhatsApp")
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_8": formData.apps.includes("TikTok")
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_9": formData.apps.includes("Telegram")
+        ? 1
+        : 0,
+      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_10": formData.apps.includes("Other")
+        ? 1
+        : 0,
+      "กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ_1":
+        formData.activities.includes("ดูหนัง / ฟังเพลง") ? 1 : 0,
+      "กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ_2":
+        formData.activities.includes("เล่นเกม") ? 1 : 0,
+      "กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ_3":
+        formData.activities.includes("ถ่ายรูป / ถ่ายวิดีโอ") ? 1 : 0,
+      "กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ_4":
+        formData.activities.includes("Application บน cloud") ? 1 : 0,
+      "กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ_5":
+        formData.activities.includes("ติดต่อสื่อสาร / ประชุมงาน") ? 1 : 0,
+      "กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ_6":
+        formData.activities.includes("โซเชียลมีเดีย") ? 1 : 0,
+      ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน_1:
+        formData.dailyUsage === "0 - 1 ชั่วโมง" ? 1 : 0,
+      ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน_2:
+        formData.dailyUsage === "1 - 3 ชั่วโมง" ? 1 : 0,
+      ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน_3:
+        formData.dailyUsage === "3 - 5 ชั่วโมง" ? 1 : 0,
+      ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน_4:
+        formData.dailyUsage === "มากกว่า 5 ชั่วโมง" ? 1 : 0,
+      สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร_1:
+        formData.importance === "จำเป็นมากที่สุด" ? 1 : 0,
+      สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร_2:
+        formData.importance === "จำเป็น" ? 1 : 0,
+      สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร_3:
+        formData.importance === "ไม่จำเป็น" ? 1 : 0,
+      ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด_1:
+        formData.purchaseFactors === "ราคา" ? 1 : 0,
+      ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด_2:
+        formData.purchaseFactors === "รีวิวสินค้า" ? 1 : 0,
+      ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด_3:
+        formData.purchaseFactors === "ฟีเจอร์สินค้า" ? 1 : 0,
+      ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_1:
+        parseInt(formData.satisfaction, 10) === 1 ? 1 : 0,
+      ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_2:
+        parseInt(formData.satisfaction, 10) === 2 ? 1 : 0,
+      ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_3:
+        parseInt(formData.satisfaction, 10) === 3 ? 1 : 0,
+      ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_4:
+        parseInt(formData.satisfaction, 10) === 4 ? 1 : 0,
+      ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_5:
+        parseInt(formData.satisfaction, 10) === 5 ? 1 : 0,
+      ปัญหาในการซื้อสมาร์ทโฟนออนไลน์_1:
+        formData.onlinePurchaseIssues ===
+        "ความกังวลเกี่ยวกับความปลอดภัยของการชำระเงิน"
+          ? 1
+          : 0,
+      ปัญหาในการซื้อสมาร์ทโฟนออนไลน์_2:
+        formData.onlinePurchaseIssues === "ไม่สามารถสัมผัสหรือลองสินค้าได้จริง"
+          ? 1
+          : 0,
+      ปัญหาในการซื้อสมาร์ทโฟนออนไลน์_3:
+        formData.onlinePurchaseIssues ===
+        "ความไม่แน่นอนเกี่ยวกับการรับประกันและการบริการหลังการขาย"
+          ? 1
+          : 0,
+      ปัญหาในการซื้อสมาร์ทโฟนออนไลน์_4:
+        formData.onlinePurchaseIssues ===
+        "ความล่าช้าในการจัดส่งหรือปัญหาในการจัดส่ง"
+          ? 1
+          : 0,
+      ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน_1:
+        formData.currentBrand === "Apple" ? 1 : 0,
+      ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน_2:
+        formData.currentBrand === "Samsung" ? 1 : 0,
+      ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน_3:
+        formData.currentBrand === "Oppo" ? 1 : 0,
+      ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน_4:
+        formData.currentBrand === "Vivo" ? 1 : 0,
+      ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน_5:
+        formData.currentBrand === "Xiaomi" ? 1 : 0,
+      ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน_6:
+        formData.currentBrand === "Other" ? 1 : 0,
+    };
 
+    try {
+      const response = await fetch(
+        "https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setPrediction(result.prediction[0]);
+      console.log(result);
+    } catch (error) {
+      console.error("Error:", error);
+      // Show a user-friendly error message
+      alert("An error occurred while processing your request.");
+    }
+  };
 
   const brandMapping = {
     0: "Apple",
@@ -90,17 +212,20 @@ function Form() {
     4: "Xiaomi",
     5: "Other",
   };
-if (prediction !== null) {
-  return (
-    <div>
-      <h2>ผลการพยากรณ์:</h2>
-      <p>ยี่ห้อสมาร์ทโฟนที่ท่านควรเลือกคือ: {brandMapping[prediction]}</p>
-    </div>
-  );
-}
+
+  if (prediction !== null) {
+    return (
+      <div>
+        <h2>ผลการพยากรณ์:</h2>
+        <p>ยี่ห้อสมาร์ทโฟนที่ท่านควรเลือกคือ: {brandMapping[prediction]}</p>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <h1>แบบสอบถามเกี่ยวกับสมาร์ทโฟน</h1>
+      {/* The rest of the form fields remain unchanged */}
       <p>เพศ *</p>
       <label>
         <input
@@ -121,6 +246,16 @@ if (prediction !== null) {
           onChange={handleChange}
         />{" "}
         หญิง
+      </label>
+      <label>
+        <input
+          type="radio"
+          name="gender"
+          value="อื่นๆ"
+          checked={formData.gender === "อื่นๆ"}
+          onChange={handleChange}
+        />{" "}
+        อื่นๆ
       </label>
 
       <p>ช่วงอายุ *</p>
@@ -772,11 +907,11 @@ if (prediction !== null) {
         <input
           type="radio"
           name="currentBrand"
-          value="XIAOMI"
-          checked={formData.currentBrand === "XIAOMI"}
+          value="Xiaomi"
+          checked={formData.currentBrand === "Xiaomi"}
           onChange={handleChange}
         />{" "}
-        XIAOMI
+        Xiaomi
       </label>
       <label>
         <input
@@ -790,12 +925,6 @@ if (prediction !== null) {
       </label>
 
       <button type="submit">ส่งแบบสอบถาม</button>
-      {prediction !== null && (
-        <div>
-          <h2>ผลการพยากรณ์:</h2>
-          <p>ยี่ห้อสมาร์ทโฟนที่ท่านควรเลือกคือ: {brandMapping[prediction]}</p>
-        </div>
-      )}
     </form>
   );
 }

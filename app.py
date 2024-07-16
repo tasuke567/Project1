@@ -1,3 +1,4 @@
+import os
 import joblib
 import pandas as pd
 from flask import Flask, request, jsonify
@@ -12,21 +13,24 @@ CORS(app)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json(force=True)
-    df = pd.DataFrame(data)
-    
-    # Ensure the feature names match
-    for col in feature_names:
-        if col not in df.columns:
-            df[col] = 0
+    try:
+        data = request.get_json(force=True)
+        df = pd.DataFrame(data)
+        
+        # Ensure the feature names match
+        for col in feature_names:
+            if col not in df.columns:
+                df[col] = 0
 
-    # Reorder columns to match the feature names used during training
-    df = df[feature_names]
-    
-    # Make prediction
-    prediction = model.predict(df)
-    
-    return jsonify({'prediction': prediction.tolist()})
+        # Reorder columns to match the feature names used during training
+        df = df[feature_names]
+        
+        # Make prediction
+        prediction = model.predict(df)
+        
+        return jsonify({'prediction': prediction.tolist()})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     from gunicorn.app.base import BaseApplication
