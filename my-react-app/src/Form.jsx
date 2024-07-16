@@ -36,20 +36,66 @@ function Form() {
 
  const handleSubmit = (event) => {
    event.preventDefault();
-   const formData = new FormData(event.target);
    const data = {
-     occupation: formData.get("occupation"),
-     income: formData.get("income"),
-     apps: formData.getAll("apps"), // Collect all selected apps
-     activities: formData.getAll("activities"), // Collect all selected activities
-     dailyUsage: formData.get("dailyUsage"),
-     importance: formData.get("importance"),
-     purchaseFactors: formData.getAll("purchaseFactors"), // Ensure this collects an array
-     satisfaction: formData.get("satisfaction"),
-     onlinePurchaseIssues: formData.get("onlinePurchaseIssues"),
-     currentBrand: formData.get("currentBrand"),
+     เพศ_1: formData.gender === "ชาย" ? 1 : 0,
+     เพศ_2: formData.gender === "หญิง" ? 1 : 0,
+     เพศ_3: formData.gender === "อื่นๆ" ? 1 : 0, // Add other gender options if applicable
+     ช่วงอายุ_1: formData.ageRange === "18-25 ปี" ? 1 : 0,
+     ช่วงอายุ_2: formData.ageRange === "26-32 ปี" ? 1 : 0,
+     ช่วงอายุ_3: formData.ageRange === "33-40 ปี" ? 1 : 0,
+     ช่วงอายุ_4: formData.ageRange === "41-50 ปี" ? 1 : 0,
+     ช่วงอายุ_5: formData.ageRange === "50-60 ปี" ? 1 : 0,
+     ช่วงอายุ_6: formData.ageRange === "60 ปีขึ้นไป" ? 1 : 0,
+     สถานภาพ_1: formData.maritalStatus === "โสด" ? 1 : 0,
+     สถานภาพ_2: formData.maritalStatus === "สมรส" ? 1 : 0,
+     สถานภาพ_3: formData.maritalStatus === "หย่าร้าง" ? 1 : 0,
+     สถานภาพ_4: formData.maritalStatus === "แยกกันอยู่" ? 1 : 0,
+     อาชีพ_1: formData.occupation === "นักเรียน / นักศึกษา" ? 1 : 0,
+     อาชีพ_2: formData.occupation === "พนักงานบริษัทเอกชน" ? 1 : 0,
+     อาชีพ_3: formData.occupation === "พนักงานข้าราชการ" ? 1 : 0,
+     อาชีพ_4: formData.occupation === "พนักงานรัฐวิสาหกิจ" ? 1 : 0,
+     อาชีพ_5: formData.occupation === "พนักงานโรงงานอุตสาหกรรม" ? 1 : 0,
+     อาชีพ_6: formData.occupation === "เจ้าของธุรกิจ/ธุรกิจส่วนตัว" ? 1 : 0,
+     รายได้_1: formData.income === "น้อยกว่า 15,000 บาท" ? 1 : 0,
+     รายได้_2: formData.income === "15,001 - 20,000 บาท" ? 1 : 0,
+     รายได้_3: formData.income === "20,001 - 30,000 บาท" ? 1 : 0,
+     รายได้_4: formData.income === "30,001 - 40,000 บาท" ? 1 : 0,
+     รายได้_5: formData.income === "40,001 - 50,000 บาท" ? 1 : 0,
+     รายได้_6: formData.income === "มากกว่า 50,001 บาทขึ้นไป" ? 1 : 0,
+     // Additional mappings for apps, activities, dailyUsage, importance, purchaseFactors, satisfaction, onlinePurchaseIssues, currentBrand
    };
-   console.log("Form data:", data); // Debugging log
+
+   // Handle arrays like apps, activities, purchaseFactors appropriately
+   formData.apps.forEach((app, index) => {
+     data[`ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_${index + 1}`] = app;
+   });
+
+   formData.activities.forEach((activity, index) => {
+     data[`กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ_${index + 1}`] = activity;
+   });
+
+   data[`ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน_1`] =
+     formData.dailyUsage === "0 - 1 ชั่วโมง" ? 1 : 0;
+   data[`ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน_2`] =
+     formData.dailyUsage === "1 - 3 ชั่วโมง" ? 1 : 0;
+   data[`ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน_3`] =
+     formData.dailyUsage === "3 - 5 ชั่วโมง" ? 1 : 0;
+   data[`ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน_4`] =
+     formData.dailyUsage === "มากกว่า 5 ชั่วโมง" ? 1 : 0;
+
+   data[`สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร_1`] =
+     formData.importance === "จำเป็นมากที่สุด" ? 1 : 0;
+   data[`สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร_2`] =
+     formData.importance === "จำเป็น" ? 1 : 0;
+   data[`สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร_3`] =
+     formData.importance === "ไม่จำเป็น" ? 1 : 0;
+
+   data[`ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด_1`] =
+     formData.purchaseFactors.includes("ราคา") ? 1 : 0;
+   data[`ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด_2`] =
+     formData.purchaseFactors.includes("รีวิวสินค้า") ? 1 : 0;
+   data[`ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด_3`] =
+     formData.purchaseFactors.includes("ฟีเจอร์สินค้า") ? 1 : 0;
 
    fetch("https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict", {
      method: "POST",
@@ -59,7 +105,7 @@ function Form() {
      body: JSON.stringify(data),
    })
      .then((response) => response.json())
-     .then((result) => console.log(result))
+     .then((result) => setPrediction(result.prediction))
      .catch((error) => console.error("Error:", error));
  };
 
