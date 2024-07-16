@@ -1,52 +1,53 @@
+import joblib
+import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import joblib
-import numpy as np
-import logging
-import pandas as pd
-
-app = Flask(__name__)
-CORS(app)
-logging.basicConfig(level=logging.INFO)
 
 # Load the model and feature names
-model, _ = joblib.load('model.pkl')  # Replace 'model.pkl' with your actual model file
-feature_names = model.feature_names_  # Or the correct attribute for your model
+model, feature_names = joblib.load('./mnt/data/model.pkl')
 
-app.logger.info(f'Expected feature names: {feature_names}')
+# Initialize the Flask app
+app = Flask(__name__)
+CORS(app)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    try:
-        data = request.get_json(force=True)
-        app.logger.info(f'Received data: {data}')
-        if not data:
-            return jsonify({'error': 'No input data provided'}), 400
+    data = request.get_json(force=True)
+    df = pd.DataFrame(data)
+    
+    # Ensure the feature names match
+    for col in feature_names:
+        if col not in df.columns:
+            df[col] = 0
 
-        # Create a DataFrame from the input data
-        input_df = pd.DataFrame([data])
+    # Reorder columns to match the feature names used during training
+    df = df[feature_names]
+    
+    # Make prediction
+    prediction = model.predict(df)
+    
+    return jsonify({'prediction': prediction.tolist()})
 
-        # One-Hot Encoding (replace with your actual feature names)
-        input_df = pd.get_dummies(input_df, columns=[
-            "เพศ", "ช่วงอายุ", "สถานภาพ", "อาชีพ", "ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน",
-            "ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด", "ปัญหาในการซื้อสมาร์ทโฟนออนไลน์"
-        ])
+if __name__ == "__main__":
+    from gunicorn.app.base import BaseApplication
 
-        # Ensure all features are present after one-hot encoding
-        missing_features = set(feature_names) - set(input_df.columns)
-        if missing_features:
-            return jsonify({'error': f'Missing features: {", ".join(missing_features)}'}), 400
+    class StandaloneApplication(BaseApplication):
+        def __init__(self, app, options=None):
+            self.options = options or {}
+            self.application = app
+            super().__init__()
 
-        # Reorder columns to match the model's expected order
-        input_df = input_df[feature_names]
+        def load_config(self):
+            config = {key: value for key, value in self.options.items()
+                      if key in self.cfg.settings and value is not None}
+            for key, value in config.items():
+                self.cfg.set(key.lower(), value)
 
-        # Make prediction
-        prediction = model.predict(input_df)
-        app.logger.info(f'Prediction: {prediction}')
-        return jsonify({'prediction': int(prediction[0])})
-    except Exception as e:
-        app.logger.error(f'Error during prediction: {e}')
-        return jsonify({'error': 'Internal server error'}), 500
+        def load(self):
+            return self.application
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    options = {
+        'bind': f"0.0.0.0:{os.environ.get('PORT', 5000)}",
+        'workers': 1,
+    }
+    StandaloneApplication(app, options).run()
