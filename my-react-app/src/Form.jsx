@@ -55,13 +55,16 @@ function Form() {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify([dataToSend]), // Make sure the data is in an array format
-      });
+      const response = await fetch(
+        "https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify([dataToSend]), // Make sure the data is in an array format
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
