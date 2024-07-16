@@ -1,14 +1,6 @@
 flask
-<<<<<<< HEAD
-flask_cors
-=======
->>>>>>> ae47d721c181d6f152cb1fcbf34ee33c1216075b
 gunicorn
 scikit-learn
 pandas
 numpy
-<<<<<<< HEAD
 joblib
-=======
-joblib
->>>>>>> ae47d721c181d6f152cb1fcbf34ee33c1216075b
