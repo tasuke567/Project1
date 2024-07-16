@@ -21,7 +21,6 @@ function Form() {
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
-
     if (type === "checkbox") {
       setFormData((prevFormData) => {
         const newValues = checked
@@ -36,13 +35,6 @@ function Form() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    if (formData.gender === "" || formData.ageRange === "") {
-      alert("Please fill out all required fields.");
-      return;
-    }
-
-    // Convert the form data to the format expected by the model
     const data = {
       เพศ_1: formData.gender === "ชาย" ? 1 : 0,
       เพศ_2: formData.gender === "หญิง" ? 1 : 0,
@@ -63,12 +55,12 @@ function Form() {
       อาชีพ_4: formData.occupation === "พนักงานรัฐวิสาหกิจ" ? 1 : 0,
       อาชีพ_5: formData.occupation === "พนักงานโรงงานอุตสาหกรรม" ? 1 : 0,
       อาชีพ_6: formData.occupation === "เจ้าของธุรกิจ/ธุรกิจส่วนตัว" ? 1 : 0,
-      รายได้_1: formData.income === "น้อยกว่า 15,000 บาท" ? 1 : 0,
-      รายได้_2: formData.income === "15,001 - 20,000 บาท" ? 1 : 0,
-      รายได้_3: formData.income === "20,001 - 30,000 บาท" ? 1 : 0,
-      รายได้_4: formData.income === "30,001 - 40,000 บาท" ? 1 : 0,
-      รายได้_5: formData.income === "40,001 - 50,000 บาท" ? 1 : 0,
-      รายได้_6: formData.income === "มากกว่า 50,001 บาทขึ้นไป" ? 1 : 0,
+      รายได้ต่อเดือน_1: formData.income === "น้อยกว่า 15,000 บาท" ? 1 : 0,
+      รายได้ต่อเดือน_2: formData.income === "15,001 - 20,000 บาท" ? 1 : 0,
+      รายได้ต่อเดือน_3: formData.income === "20,001 - 30,000 บาท" ? 1 : 0,
+      รายได้ต่อเดือน_4: formData.income === "30,001 - 40,000 บาท" ? 1 : 0,
+      รายได้ต่อเดือน_5: formData.income === "40,001 - 50,000 บาท" ? 1 : 0,
+      รายได้ต่อเดือน_6: formData.income === "มากกว่า 50,001 บาทขึ้นไป" ? 1 : 0,
       "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?_1": formData.apps.includes(
         "Instagram"
       )
@@ -136,15 +128,15 @@ function Form() {
       ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด_3:
         formData.purchaseFactors === "ฟีเจอร์สินค้า" ? 1 : 0,
       ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_1:
-        parseInt(formData.satisfaction, 10) === 1 ? 1 : 0,
+        parseInt(formData.satisfaction) === 1 ? 1 : 0,
       ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_2:
-        parseInt(formData.satisfaction, 10) === 2 ? 1 : 0,
+        parseInt(formData.satisfaction) === 2 ? 1 : 0,
       ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_3:
-        parseInt(formData.satisfaction, 10) === 3 ? 1 : 0,
+        parseInt(formData.satisfaction) === 3 ? 1 : 0,
       ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_4:
-        parseInt(formData.satisfaction, 10) === 4 ? 1 : 0,
+        parseInt(formData.satisfaction) === 4 ? 1 : 0,
       ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน_5:
-        parseInt(formData.satisfaction, 10) === 5 ? 1 : 0,
+        parseInt(formData.satisfaction) === 5 ? 1 : 0,
       ปัญหาในการซื้อสมาร์ทโฟนออนไลน์_1:
         formData.onlinePurchaseIssues ===
         "ความกังวลเกี่ยวกับความปลอดภัยของการชำระเงิน"
@@ -186,7 +178,7 @@ function Form() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify([data]), // Send data as an array
         }
       );
 
@@ -195,11 +187,9 @@ function Form() {
       }
 
       const result = await response.json();
-      setPrediction(result.prediction[0]);
-      console.log(result);
+      setPrediction(result.prediction[0]); // Update to handle the response correctly
     } catch (error) {
       console.error("Error:", error);
-      // Show a user-friendly error message
       alert("An error occurred while processing your request.");
     }
   };
