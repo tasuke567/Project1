@@ -34,8 +34,12 @@ function Form() {
     }
   };
 
- const handleSubmit = (event) => {
+ const handleSubmit = async (event) => {
    event.preventDefault();
+   if (formData.gender === "" || formData.ageRange === "") {
+     alert("Please fill out all required fields.");
+     return;
+   }
    const data = {
      เพศ_1: formData.gender === "ชาย" ? 1 : 0,
      เพศ_2: formData.gender === "หญิง" ? 1 : 0,
@@ -97,16 +101,29 @@ function Form() {
    data[`ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด_3`] =
      formData.purchaseFactors.includes("ฟีเจอร์สินค้า") ? 1 : 0;
 
-   fetch("https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict", {
-     method: "POST",
-     headers: {
-       "Content-Type": "application/json",
-     },
-     body: JSON.stringify(data),
-   })
-     .then((response) => response.json())
-     .then((result) => setPrediction(result.prediction))
-     .catch((error) => console.error("Error:", error));
+   try {
+    const response = await fetch(
+      "https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    setPrediction(result.prediction);
+  } catch (error) {
+    console.error("Error:", error);
+    // Show a user-friendly error message
+    alert("An error occurred while processing your request.");
+  }
  };
 
 
