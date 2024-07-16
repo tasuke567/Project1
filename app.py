@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Load the model and feature names
 model, feature_names = joblib.load('model.pkl')
+app.logger.info(f'Expected feature names: {feature_names}')
 
 @app.route('/predict', methods=['POST'])
 def predict():
