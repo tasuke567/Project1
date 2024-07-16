@@ -10,7 +10,7 @@ model, feature_names = joblib.load('./mnt/data/model.pkl')
 # Initialize the Flask app
 app = Flask(__name__)
 CORS(app)
-
+#gg
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
