@@ -203,719 +203,843 @@ function Form() {
     5: "Other",
   };
 
-  if (prediction !== null) {
-    return (
-      <div>
-        <h2>ผลการพยากรณ์:</h2>
-        <p>ยี่ห้อสมาร์ทโฟนที่ท่านควรเลือกคือ: {brandMapping[prediction]}</p>
-      </div>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit}>
-      <h1>แบบสอบถามเกี่ยวกับสมาร์ทโฟน</h1>
-      {/* The rest of the form fields remain unchanged */}
-      <p>เพศ *</p>
-      <label>
-        <input
-          type="radio"
-          name="gender"
-          value="ชาย"
-          checked={formData.gender === "ชาย"}
-          onChange={handleChange}
-        />{" "}
-        ชาย
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="gender"
-          value="หญิง"
-          checked={formData.gender === "หญิง"}
-          onChange={handleChange}
-        />{" "}
-        หญิง
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="gender"
-          value="อื่นๆ"
-          checked={formData.gender === "อื่นๆ"}
-          onChange={handleChange}
-        />{" "}
-        อื่นๆ
-      </label>
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
+      <h1 className="text-2xl font-bold mb-6">แบบสอบถามเกี่ยวกับสมาร์ทโฟน</h1>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">เพศ *</label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="gender"
+              value="ชาย"
+              checked={formData.gender === "ชาย"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">ชาย</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="gender"
+              value="หญิง"
+              checked={formData.gender === "หญิง"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">หญิง</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="gender"
+              value="อื่นๆ"
+              checked={formData.gender === "อื่นๆ"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">อื่นๆ</span>
+          </label>
+        </div>
 
-      <p>ช่วงอายุ *</p>
-      <label>
-        <input
-          type="radio"
-          name="ageRange"
-          value="18-25 ปี"
-          checked={formData.ageRange === "18-25 ปี"}
-          onChange={handleChange}
-        />{" "}
-        18-25 ปี
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="ageRange"
-          value="26-32 ปี"
-          checked={formData.ageRange === "26-32 ปี"}
-          onChange={handleChange}
-        />{" "}
-        26-32 ปี
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="ageRange"
-          value="33-40 ปี"
-          checked={formData.ageRange === "33-40 ปี"}
-          onChange={handleChange}
-        />{" "}
-        33-40 ปี
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="ageRange"
-          value="41-50 ปี"
-          checked={formData.ageRange === "41-50 ปี"}
-          onChange={handleChange}
-        />{" "}
-        41-50 ปี
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="ageRange"
-          value="50-60 ปี"
-          checked={formData.ageRange === "50-60 ปี"}
-          onChange={handleChange}
-        />{" "}
-        50-60 ปี
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="ageRange"
-          value="60 ปีขึ้นไป"
-          checked={formData.ageRange === "60 ปีขึ้นไป"}
-          onChange={handleChange}
-        />{" "}
-        60 ปีขึ้นไป
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">ช่วงอายุ *</label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="ageRange"
+              value="18-25 ปี"
+              checked={formData.ageRange === "18-25 ปี"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">18-25 ปี</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="ageRange"
+              value="26-32 ปี"
+              checked={formData.ageRange === "26-32 ปี"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">26-32 ปี</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="ageRange"
+              value="33-40 ปี"
+              checked={formData.ageRange === "33-40 ปี"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">33-40 ปี</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="ageRange"
+              value="41-50 ปี"
+              checked={formData.ageRange === "41-50 ปี"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">41-50 ปี</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="ageRange"
+              value="50-60 ปี"
+              checked={formData.ageRange === "50-60 ปี"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">50-60 ปี</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="ageRange"
+              value="60 ปีขึ้นไป"
+              checked={formData.ageRange === "60 ปีขึ้นไป"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">60 ปีขึ้นไป</span>
+          </label>
+        </div>
 
-      <p>สถานภาพ *</p>
-      <label>
-        <input
-          type="radio"
-          name="maritalStatus"
-          value="โสด"
-          checked={formData.maritalStatus === "โสด"}
-          onChange={handleChange}
-        />{" "}
-        โสด
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="maritalStatus"
-          value="สมรส"
-          checked={formData.maritalStatus === "สมรส"}
-          onChange={handleChange}
-        />{" "}
-        สมรส
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="maritalStatus"
-          value="หย่าร้าง"
-          checked={formData.maritalStatus === "หย่าร้าง"}
-          onChange={handleChange}
-        />{" "}
-        หย่าร้าง
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="maritalStatus"
-          value="แยกกันอยู่"
-          checked={formData.maritalStatus === "แยกกันอยู่"}
-          onChange={handleChange}
-        />{" "}
-        แยกกันอยู่
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">สถานภาพ *</label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="maritalStatus"
+              value="โสด"
+              checked={formData.maritalStatus === "โสด"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">โสด</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="maritalStatus"
+              value="สมรส"
+              checked={formData.maritalStatus === "สมรส"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">สมรส</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="maritalStatus"
+              value="หย่าร้าง"
+              checked={formData.maritalStatus === "หย่าร้าง"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">หย่าร้าง</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="maritalStatus"
+              value="แยกกันอยู่"
+              checked={formData.maritalStatus === "แยกกันอยู่"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">แยกกันอยู่</span>
+          </label>
+        </div>
 
-      <p>อาชีพ *</p>
-      <label>
-        <input
-          type="radio"
-          name="occupation"
-          value="นักเรียน / นักศึกษา"
-          checked={formData.occupation === "นักเรียน / นักศึกษา"}
-          onChange={handleChange}
-        />{" "}
-        นักเรียน / นักศึกษา
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="occupation"
-          value="พนักงานบริษัทเอกชน"
-          checked={formData.occupation === "พนักงานบริษัทเอกชน"}
-          onChange={handleChange}
-        />{" "}
-        พนักงานบริษัทเอกชน
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="occupation"
-          value="พนักงานข้าราชการ"
-          checked={formData.occupation === "พนักงานข้าราชการ"}
-          onChange={handleChange}
-        />{" "}
-        พนักงานข้าราชการ
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="occupation"
-          value="พนักงานรัฐวิสาหกิจ"
-          checked={formData.occupation === "พนักงานรัฐวิสาหกิจ"}
-          onChange={handleChange}
-        />{" "}
-        พนักงานรัฐวิสาหกิจ
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="occupation"
-          value="พนักงานโรงงานอุตสาหกรรม"
-          checked={formData.occupation === "พนักงานโรงงานอุตสาหกรรม"}
-          onChange={handleChange}
-        />{" "}
-        พนักงานโรงงานอุตสาหกรรม
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="occupation"
-          value="เจ้าของธุรกิจ/ธุรกิจส่วนตัว"
-          checked={formData.occupation === "เจ้าของธุรกิจ/ธุรกิจส่วนตัว"}
-          onChange={handleChange}
-        />{" "}
-        เจ้าของธุรกิจ/ธุรกิจส่วนตัว
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">อาชีพ *</label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="occupation"
+              value="นักเรียน / นักศึกษา"
+              checked={formData.occupation === "นักเรียน / นักศึกษา"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">นักเรียน / นักศึกษา</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="occupation"
+              value="พนักงานบริษัทเอกชน"
+              checked={formData.occupation === "พนักงานบริษัทเอกชน"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">พนักงานบริษัทเอกชน</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="occupation"
+              value="พนักงานข้าราชการ"
+              checked={formData.occupation === "พนักงานข้าราชการ"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">พนักงานข้าราชการ</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="occupation"
+              value="พนักงานรัฐวิสาหกิจ"
+              checked={formData.occupation === "พนักงานรัฐวิสาหกิจ"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">พนักงานรัฐวิสาหกิจ</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="occupation"
+              value="พนักงานโรงงานอุตสาหกรรม"
+              checked={formData.occupation === "พนักงานโรงงานอุตสาหกรรม"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">พนักงานโรงงานอุตสาหกรรม</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="occupation"
+              value="เจ้าของธุรกิจ/ธุรกิจส่วนตัว"
+              checked={formData.occupation === "เจ้าของธุรกิจ/ธุรกิจส่วนตัว"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">เจ้าของธุรกิจ/ธุรกิจส่วนตัว</span>
+          </label>
+        </div>
 
-      <p>รายได้ต่อเดือน *</p>
-      <label>
-        <input
-          type="radio"
-          name="income"
-          value="น้อยกว่า 15,000 บาท"
-          checked={formData.income === "น้อยกว่า 15,000 บาท"}
-          onChange={handleChange}
-        />{" "}
-        น้อยกว่า 15,000 บาท
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="income"
-          value="15,001 - 20,000 บาท"
-          checked={formData.income === "15,001 - 20,000 บาท"}
-          onChange={handleChange}
-        />{" "}
-        15,001 - 20,000 บาท
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="income"
-          value="20,001 - 30,000 บาท"
-          checked={formData.income === "20,001 - 30,000 บาท"}
-          onChange={handleChange}
-        />{" "}
-        20,001 - 30,000 บาท
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="income"
-          value="30,001 - 40,000 บาท"
-          checked={formData.income === "30,001 - 40,000 บาท"}
-          onChange={handleChange}
-        />{" "}
-        30,001 - 40,000 บาท
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="income"
-          value="40,001 - 50,000 บาท"
-          checked={formData.income === "40,001 - 50,000 บาท"}
-          onChange={handleChange}
-        />{" "}
-        40,001 - 50,000 บาท
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="income"
-          value="มากกว่า 50,001 บาทขึ้นไป"
-          checked={formData.income === "มากกว่า 50,001 บาทขึ้นไป"}
-          onChange={handleChange}
-        />{" "}
-        มากกว่า 50,001 บาทขึ้นไป
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">รายได้ต่อเดือน *</label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="income"
+              value="น้อยกว่า 15,000 บาท"
+              checked={formData.income === "น้อยกว่า 15,000 บาท"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">น้อยกว่า 15,000 บาท</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="income"
+              value="15,001 - 20,000 บาท"
+              checked={formData.income === "15,001 - 20,000 บาท"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">15,001 - 20,000 บาท</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="income"
+              value="20,001 - 30,000 บาท"
+              checked={formData.income === "20,001 - 30,000 บาท"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">20,001 - 30,000 บาท</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="income"
+              value="30,001 - 40,000 บาท"
+              checked={formData.income === "30,001 - 40,000 บาท"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">30,001 - 40,000 บาท</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="income"
+              value="40,001 - 50,000 บาท"
+              checked={formData.income === "40,001 - 50,000 บาท"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">40,001 - 50,000 บาท</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="income"
+              value="มากกว่า 50,001 บาทขึ้นไป"
+              checked={formData.income === "มากกว่า 50,001 บาทขึ้นไป"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">มากกว่า 50,001 บาทขึ้นไป</span>
+          </label>
+        </div>
 
-      <p>ท่านใช้งานแอปพลิเคชันใดบ้างเป็นประจำ? *</p>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="Instagram"
-          checked={formData.apps.includes("Instagram")}
-          onChange={handleChange}
-        />{" "}
-        Instagram
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="Facebook"
-          checked={formData.apps.includes("Facebook")}
-          onChange={handleChange}
-        />{" "}
-        Facebook
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="YouTube"
-          checked={formData.apps.includes("YouTube")}
-          onChange={handleChange}
-        />{" "}
-        YouTube
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="Snapchat"
-          checked={formData.apps.includes("Snapchat")}
-          onChange={handleChange}
-        />{" "}
-        Snapchat
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="Facebook Messenger"
-          checked={formData.apps.includes("Facebook Messenger")}
-          onChange={handleChange}
-        />{" "}
-        Facebook Messenger
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="Spotify"
-          checked={formData.apps.includes("Spotify")}
-          onChange={handleChange}
-        />{" "}
-        Spotify
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="WhatsApp"
-          checked={formData.apps.includes("WhatsApp")}
-          onChange={handleChange}
-        />{" "}
-        WhatsApp
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="TikTok"
-          checked={formData.apps.includes("TikTok")}
-          onChange={handleChange}
-        />{" "}
-        TikTok
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="Telegram"
-          checked={formData.apps.includes("Telegram")}
-          onChange={handleChange}
-        />{" "}
-        Telegram
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="apps"
-          value="Other"
-          checked={formData.apps.includes("Other")}
-          onChange={handleChange}
-        />{" "}
-        Other
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">
+            ท่านใช้งานแอปพลิเคชันใดบ้างเป็นประจำ? *
+          </label>
+          <div className="flex flex-wrap">
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="Instagram"
+                checked={formData.apps.includes("Instagram")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Instagram</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="Facebook"
+                checked={formData.apps.includes("Facebook")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Facebook</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="YouTube"
+                checked={formData.apps.includes("YouTube")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">YouTube</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="Snapchat"
+                checked={formData.apps.includes("Snapchat")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Snapchat</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="Facebook Messenger"
+                checked={formData.apps.includes("Facebook Messenger")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Facebook Messenger</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="Spotify"
+                checked={formData.apps.includes("Spotify")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Spotify</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="WhatsApp"
+                checked={formData.apps.includes("WhatsApp")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">WhatsApp</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="TikTok"
+                checked={formData.apps.includes("TikTok")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">TikTok</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="apps"
+                value="Telegram"
+                checked={formData.apps.includes("Telegram")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Telegram</span>
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                name="apps"
+                value="Other"
+                checked={formData.apps.includes("Other")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Other</span>
+            </label>
+          </div>
+        </div>
 
-      <p>กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ *</p>
-      <label>
-        <input
-          type="checkbox"
-          name="activities"
-          value="ดูหนัง / ฟังเพลง"
-          checked={formData.activities.includes("ดูหนัง / ฟังเพลง")}
-          onChange={handleChange}
-        />{" "}
-        ดูหนัง / ฟังเพลง
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="activities"
-          value="เล่นเกม"
-          checked={formData.activities.includes("เล่นเกม")}
-          onChange={handleChange}
-        />{" "}
-        เล่นเกม
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="activities"
-          value="ถ่ายรูป / ถ่ายวิดีโอ"
-          checked={formData.activities.includes("ถ่ายรูป / ถ่ายวิดีโอ")}
-          onChange={handleChange}
-        />{" "}
-        ถ่ายรูป / ถ่ายวิดีโอ
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="activities"
-          value="Application บน cloud"
-          checked={formData.activities.includes("Application บน cloud")}
-          onChange={handleChange}
-        />{" "}
-        Application บน cloud
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="activities"
-          value="ติดต่อสื่อสาร / ประชุมงาน"
-          checked={formData.activities.includes("ติดต่อสื่อสาร / ประชุมงาน")}
-          onChange={handleChange}
-        />{" "}
-        ติดต่อสื่อสาร / ประชุมงาน
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          name="activities"
-          value="โซเชียลมีเดีย"
-          checked={formData.activities.includes("โซเชียลมีเดีย")}
-          onChange={handleChange}
-        />{" "}
-        โซเชียลมีเดีย
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">
+            กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ *
+          </label>
+          <div className="flex flex-wrap">
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="activities"
+                value="ดูหนัง / ฟังเพลง"
+                checked={formData.activities.includes("ดูหนัง / ฟังเพลง")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">ดูหนัง / ฟังเพลง</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="activities"
+                value="เล่นเกม"
+                checked={formData.activities.includes("เล่นเกม")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">เล่นเกม</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="activities"
+                value="ถ่ายรูป / ถ่ายวิดีโอ"
+                checked={formData.activities.includes("ถ่ายรูป / ถ่ายวิดีโอ")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">ถ่ายรูป / ถ่ายวิดีโอ</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="activities"
+                value="Application บน cloud"
+                checked={formData.activities.includes("Application บน cloud")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Application บน cloud</span>
+            </label>
+            <label className="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                name="activities"
+                value="ติดต่อสื่อสาร / ประชุมงาน"
+                checked={formData.activities.includes(
+                  "ติดต่อสื่อสาร / ประชุมงาน"
+                )}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">ติดต่อสื่อสาร / ประชุมงาน</span>
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                name="activities"
+                value="โซเชียลมีเดีย"
+                checked={formData.activities.includes("โซเชียลมีเดีย")}
+                onChange={handleChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">โซเชียลมีเดีย</span>
+            </label>
+          </div>
+        </div>
 
-      <p>ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน *</p>
-      <label>
-        <input
-          type="radio"
-          name="dailyUsage"
-          value="0 - 1 ชั่วโมง"
-          checked={formData.dailyUsage === "0 - 1 ชั่วโมง"}
-          onChange={handleChange}
-        />{" "}
-        0 - 1 ชั่วโมง
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="dailyUsage"
-          value="1 - 3 ชั่วโมง"
-          checked={formData.dailyUsage === "1 - 3 ชั่วโมง"}
-          onChange={handleChange}
-        />{" "}
-        1 - 3 ชั่วโมง
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="dailyUsage"
-          value="3 - 5 ชั่วโมง"
-          checked={formData.dailyUsage === "3 - 5 ชั่วโมง"}
-          onChange={handleChange}
-        />{" "}
-        3 - 5 ชั่วโมง
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="dailyUsage"
-          value="มากกว่า 5 ชั่วโมง"
-          checked={formData.dailyUsage === "มากกว่า 5 ชั่วโมง"}
-          onChange={handleChange}
-        />{" "}
-        มากกว่า 5 ชั่วโมง
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">
+            ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน *
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="dailyUsage"
+              value="0 - 1 ชั่วโมง"
+              checked={formData.dailyUsage === "0 - 1 ชั่วโมง"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">0 - 1 ชั่วโมง</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="dailyUsage"
+              value="1 - 3 ชั่วโมง"
+              checked={formData.dailyUsage === "1 - 3 ชั่วโมง"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">1 - 3 ชั่วโมง</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="dailyUsage"
+              value="3 - 5 ชั่วโมง"
+              checked={formData.dailyUsage === "3 - 5 ชั่วโมง"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">3 - 5 ชั่วโมง</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="dailyUsage"
+              value="มากกว่า 5 ชั่วโมง"
+              checked={formData.dailyUsage === "มากกว่า 5 ชั่วโมง"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">มากกว่า 5 ชั่วโมง</span>
+          </label>
+        </div>
 
-      <p>สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร *</p>
-      <label>
-        <input
-          type="radio"
-          name="importance"
-          value="จำเป็นมากที่สุด"
-          checked={formData.importance === "จำเป็นมากที่สุด"}
-          onChange={handleChange}
-        />{" "}
-        จำเป็นมากที่สุด
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="importance"
-          value="จำเป็น"
-          checked={formData.importance === "จำเป็น"}
-          onChange={handleChange}
-        />{" "}
-        จำเป็น
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="importance"
-          value="ไม่จำเป็น"
-          checked={formData.importance === "ไม่จำเป็น"}
-          onChange={handleChange}
-        />{" "}
-        ไม่จำเป็น
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">
+            สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร *
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="importance"
+              value="จำเป็นมากที่สุด"
+              checked={formData.importance === "จำเป็นมากที่สุด"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">จำเป็นมากที่สุด</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="importance"
+              value="จำเป็น"
+              checked={formData.importance === "จำเป็น"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">จำเป็น</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="importance"
+              value="ไม่จำเป็น"
+              checked={formData.importance === "ไม่จำเป็น"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">ไม่จำเป็น</span>
+          </label>
+        </div>
 
-      <p>ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด *</p>
-      <label>
-        <input
-          type="radio"
-          name="purchaseFactors"
-          value="ราคา"
-          checked={formData.purchaseFactors === "ราคา"}
-          onChange={handleChange}
-        />{" "}
-        ราคา
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="purchaseFactors"
-          value="รีวิวสินค้า"
-          checked={formData.purchaseFactors === "รีวิวสินค้า"}
-          onChange={handleChange}
-        />{" "}
-        รีวิวสินค้า
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="purchaseFactors"
-          value="ฟีเจอร์สินค้า"
-          checked={formData.purchaseFactors === "ฟีเจอร์สินค้า"}
-          onChange={handleChange}
-        />{" "}
-        ฟีเจอร์สินค้า
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">
+            ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด *
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="purchaseFactors"
+              value="ราคา"
+              checked={formData.purchaseFactors === "ราคา"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">ราคา</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="purchaseFactors"
+              value="รีวิวสินค้า"
+              checked={formData.purchaseFactors === "รีวิวสินค้า"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">รีวิวสินค้า</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="purchaseFactors"
+              value="ฟีเจอร์สินค้า"
+              checked={formData.purchaseFactors === "ฟีเจอร์สินค้า"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">ฟีเจอร์สินค้า</span>
+          </label>
+        </div>
 
-      <p>ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน *</p>
-      <label>
-        <input
-          type="radio"
-          name="satisfaction"
-          value="1"
-          checked={formData.satisfaction === "1"}
-          onChange={handleChange}
-        />{" "}
-        1
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="satisfaction"
-          value="2"
-          checked={formData.satisfaction === "2"}
-          onChange={handleChange}
-        />{" "}
-        2
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="satisfaction"
-          value="3"
-          checked={formData.satisfaction === "3"}
-          onChange={handleChange}
-        />{" "}
-        3
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="satisfaction"
-          value="4"
-          checked={formData.satisfaction === "4"}
-          onChange={handleChange}
-        />{" "}
-        4
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="satisfaction"
-          value="5"
-          checked={formData.satisfaction === "5"}
-          onChange={handleChange}
-        />{" "}
-        5
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">
+            ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน *
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="satisfaction"
+              value="1"
+              checked={formData.satisfaction === "1"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">1</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="satisfaction"
+              value="2"
+              checked={formData.satisfaction === "2"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">2</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="satisfaction"
+              value="3"
+              checked={formData.satisfaction === "3"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">3</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="satisfaction"
+              value="4"
+              checked={formData.satisfaction === "4"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">4</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="satisfaction"
+              value="5"
+              checked={formData.satisfaction === "5"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">5</span>
+          </label>
+        </div>
 
-      <p>ปัญหาในการซื้อสมาร์ทโฟนออนไลน์ *</p>
-      <label>
-        <input
-          type="radio"
-          name="onlinePurchaseIssues"
-          value="ความกังวลเกี่ยวกับความปลอดภัยของการชำระเงิน"
-          checked={
-            formData.onlinePurchaseIssues ===
-            "ความกังวลเกี่ยวกับความปลอดภัยของการชำระเงิน"
-          }
-          onChange={handleChange}
-        />{" "}
-        ความกังวลเกี่ยวกับความปลอดภัยของการชำระเงิน
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="onlinePurchaseIssues"
-          value="ไม่สามารถสัมผัสหรือลองสินค้าได้จริง"
-          checked={
-            formData.onlinePurchaseIssues ===
-            "ไม่สามารถสัมผัสหรือลองสินค้าได้จริง"
-          }
-          onChange={handleChange}
-        />{" "}
-        ไม่สามารถสัมผัสหรือลองสินค้าได้จริง
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="onlinePurchaseIssues"
-          value="ความไม่แน่นอนเกี่ยวกับการรับประกันและการบริการหลังการขาย"
-          checked={
-            formData.onlinePurchaseIssues ===
-            "ความไม่แน่นอนเกี่ยวกับการรับประกันและการบริการหลังการขาย"
-          }
-          onChange={handleChange}
-        />{" "}
-        ความไม่แน่นอนเกี่ยวกับการรับประกันและการบริการหลังการขาย
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="onlinePurchaseIssues"
-          value="ความล่าช้าในการจัดส่งหรือปัญหาในการจัดส่ง"
-          checked={
-            formData.onlinePurchaseIssues ===
-            "ความล่าช้าในการจัดส่งหรือปัญหาในการจัดส่ง"
-          }
-          onChange={handleChange}
-        />{" "}
-        ความล่าช้าในการจัดส่งหรือปัญหาในการจัดส่ง
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">
+            ปัญหาในการซื้อสมาร์ทโฟนออนไลน์ *
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="onlinePurchaseIssues"
+              value="ความกังวลเกี่ยวกับความปลอดภัยของการชำระเงิน"
+              checked={
+                formData.onlinePurchaseIssues ===
+                "ความกังวลเกี่ยวกับความปลอดภัยของการชำระเงิน"
+              }
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">
+              ความกังวลเกี่ยวกับความปลอดภัยของการชำระเงิน
+            </span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="onlinePurchaseIssues"
+              value="ไม่สามารถสัมผัสหรือลองสินค้าได้จริง"
+              checked={
+                formData.onlinePurchaseIssues ===
+                "ไม่สามารถสัมผัสหรือลองสินค้าได้จริง"
+              }
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">ไม่สามารถสัมผัสหรือลองสินค้าได้จริง</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="onlinePurchaseIssues"
+              value="ความไม่แน่นอนเกี่ยวกับการรับประกันและการบริการหลังการขาย"
+              checked={
+                formData.onlinePurchaseIssues ===
+                "ความไม่แน่นอนเกี่ยวกับการรับประกันและการบริการหลังการขาย"
+              }
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">
+              ความไม่แน่นอนเกี่ยวกับการรับประกันและการบริการหลังการขาย
+            </span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="onlinePurchaseIssues"
+              value="ความล่าช้าในการจัดส่งหรือปัญหาในการจัดส่ง"
+              checked={
+                formData.onlinePurchaseIssues ===
+                "ความล่าช้าในการจัดส่งหรือปัญหาในการจัดส่ง"
+              }
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">
+              ความล่าช้าในการจัดส่งหรือปัญหาในการจัดส่ง
+            </span>
+          </label>
+        </div>
 
-      <p>ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน *</p>
-      <label>
-        <input
-          type="radio"
-          name="currentBrand"
-          value="Apple"
-          checked={formData.currentBrand === "Apple"}
-          onChange={handleChange}
-        />{" "}
-        Apple
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="currentBrand"
-          value="Samsung"
-          checked={formData.currentBrand === "Samsung"}
-          onChange={handleChange}
-        />{" "}
-        Samsung
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="currentBrand"
-          value="Oppo"
-          checked={formData.currentBrand === "Oppo"}
-          onChange={handleChange}
-        />{" "}
-        Oppo
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="currentBrand"
-          value="Vivo"
-          checked={formData.currentBrand === "Vivo"}
-          onChange={handleChange}
-        />{" "}
-        Vivo
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="currentBrand"
-          value="Xiaomi"
-          checked={formData.currentBrand === "Xiaomi"}
-          onChange={handleChange}
-        />{" "}
-        Xiaomi
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="currentBrand"
-          value="Other"
-          checked={formData.currentBrand === "Other"}
-          onChange={handleChange}
-        />{" "}
-        Other
-      </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">
+            ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน *
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="currentBrand"
+              value="Apple"
+              checked={formData.currentBrand === "Apple"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">Apple</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="currentBrand"
+              value="Samsung"
+              checked={formData.currentBrand === "Samsung"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">Samsung</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="currentBrand"
+              value="Oppo"
+              checked={formData.currentBrand === "Oppo"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">Oppo</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="currentBrand"
+              value="Vivo"
+              checked={formData.currentBrand === "Vivo"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">Vivo</span>
+          </label>
+          <label className="inline-flex items-center mr-4">
+            <input
+              type="radio"
+              name="currentBrand"
+              value="Xiaomi"
+              checked={formData.currentBrand === "Xiaomi"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">Xiaomi</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="currentBrand"
+              value="Other"
+              checked={formData.currentBrand === "Other"}
+              onChange={handleChange}
+              className="form-radio"
+            />
+            <span className="ml-2">Other</span>
+          </label>
+        </div>
 
-      <button type="submit">ส่งแบบสอบถาม</button>
-    </form>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+        >
+          ส่งแบบสอบถาม
+        </button>
+
+        {prediction !== null && (
+          <div className="mt-6 p-4 bg-green-100 text-green-800 rounded">
+            <h2 className="text-xl font-bold">ผลการพยากรณ์:</h2>
+            <p>ยี่ห้อสมาร์ทโฟนที่ท่านควรเลือกคือ: {brandMapping[prediction]}</p>
+          </div>
+        )}
+      </form>
+    </div>
   );
 }
 
