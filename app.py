@@ -28,7 +28,6 @@ def predict():
     
     return jsonify({'prediction': prediction.tolist()})
 
-<<<<<<< HEAD
 if __name__ == "__main__":
     from gunicorn.app.base import BaseApplication
 
@@ -52,8 +51,3 @@ if __name__ == "__main__":
         'workers': 1,
     }
     StandaloneApplication(app, options).run()
-=======
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
->>>>>>> ae47d721c181d6f152cb1fcbf34ee33c1216075b
