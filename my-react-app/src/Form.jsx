@@ -34,48 +34,35 @@ function Form() {
     }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+ const handleSubmit = (event) => {
+   event.preventDefault();
+   const formData = new FormData(event.target);
+   const data = {
+     occupation: formData.get("occupation"),
+     income: formData.get("income"),
+     apps: formData.getAll("apps"), // Collect all selected apps
+     activities: formData.getAll("activities"), // Collect all selected activities
+     dailyUsage: formData.get("dailyUsage"),
+     importance: formData.get("importance"),
+     purchaseFactors: formData.getAll("purchaseFactors"), // Ensure this collects an array
+     satisfaction: formData.get("satisfaction"),
+     onlinePurchaseIssues: formData.get("onlinePurchaseIssues"),
+     currentBrand: formData.get("currentBrand"),
+   };
+   console.log("Form data:", data); // Debugging log
 
-    const dataToSend = {
-      เพศ: formData.gender,
-      ช่วงอายุ: formData.ageRange,
-      สถานภาพ: formData.maritalStatus,
-      "กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ":
-        formData.activities.join(", "),
-      "ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?": formData.apps.join(", "),
-      ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน: formData.dailyUsage,
-      สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร: formData.importance,
-      ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด:
-        formData.purchaseFactors.join(", "),
-      ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน: formData.satisfaction,
-      ปัญหาในการซื้อสมาร์ทโฟนออนไลน์: formData.onlinePurchaseIssues,
-      รายได้ต่อเดือน: formData.income,
-      อาชีพ: formData.occupation,
-    };
+   fetch("https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict", {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json",
+     },
+     body: JSON.stringify(data),
+   })
+     .then((response) => response.json())
+     .then((result) => console.log(result))
+     .catch((error) => console.error("Error:", error));
+ };
 
-    try {
-      const response = await fetch(
-        "https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify([dataToSend]), // Make sure the data is in an array format
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setPrediction(data.prediction[0]); // Update the state with the prediction
-      } else {
-        console.error("Error:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
 
   const brandMapping = {
     0: "Apple",
