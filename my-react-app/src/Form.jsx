@@ -172,7 +172,7 @@ function Form() {
 
     try {
       const response = await fetch(
-        "https://young-fjord-99605-f7d115ccd553.herokuapp.com/predict",
+        "https://project1-l0cx.onrender.com/predict",
         {
           method: "POST",
           headers: {
