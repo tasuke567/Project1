@@ -28,10 +28,13 @@ const CombinedComponent = () => {
     formData.append("min_samples_leaf", minSamplesLeaf);
 
     try {
-      const response = await fetch("/tune_model", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://project1-l0cx.onrender.com/tune_model",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       const result = await response.json();
       console.log(result);
     } catch (error) {
