@@ -1,23 +1,18 @@
 import React, { useState } from "react";
 import Form from "./Form";
-import UploadModel from "./UploadModel";
-import NavBar from "./NavBar";
-import LoginForm from "./LoginForm";
-import TuningForm from "./TuningForm";
+import CombinedComponent from "./CombinedComponent";
 import "./output.css";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showLoginForm, setShowLoginForm] = useState(false);
-  const [showTuningForm, setShowTuningForm] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (event) => {
     event.preventDefault();
+    // Implement your authentication logic here
     if (username === "admin" && password === "password") {
       setIsAuthenticated(true);
-      setShowLoginForm(false);
     } else {
       alert("Invalid credentials");
     }
@@ -27,68 +22,72 @@ function App() {
     setIsAuthenticated(false);
   };
 
-  const toggleLoginForm = () => {
-    setShowLoginForm((prevShowLoginForm) => !prevShowLoginForm);
-  };
-
-  const handleTuningSubmit = async (data) => {
-    const formData = new FormData();
-    formData.append("max_depth", data.maxDepth);
-    formData.append("min_samples_split", data.minSamplesSplit);
-    formData.append("min_samples_leaf", data.minSamplesLeaf);
-    formData.append("dataset", data.dataset);
-
-    try {
-      const response = await fetch(
-        "https://project1-l0cx.onrender.com/tune_model",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      alert("Model tuning completed successfully");
-    } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred while tuning the model.");
-    }
-  };
-
   return (
-    <div className="App">
+    <div className="App min-h-screen flex flex-col">
       <header className="App-header">
-        <NavBar
-          isAuthenticated={isAuthenticated}
-          handleLogout={handleLogout}
-          toggleLoginForm={toggleLoginForm}
-        />
+        <nav className="bg-gray-800 p-4">
+          <div className="container mx-auto flex justify-between items-center">
+            <div className="text-white text-2xl font-bold">
+              Smartphone Survey
+            </div>
+            <div>
+              {isAuthenticated ? (
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Logout
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsAuthenticated(true)} // This will show the login form
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Login
+                </button>
+              )}
+            </div>
+          </div>
+        </nav>
       </header>
-      <main>
+      <main className="flex-grow">
         {isAuthenticated ? (
-          <>
-            <button
-              onClick={() => setShowTuningForm((prev) => !prev)}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-            >
-              {showTuningForm ? "Hide Tuning Form" : "Show Tuning Form"}
-            </button>
-            {showTuningForm && <TuningForm onSubmit={handleTuningSubmit} />}
-            <UploadModel />
-          </>
+          <CombinedComponent />
         ) : (
-          showLoginForm && (
-            <LoginForm
-              handleLogin={handleLogin}
-              username={username}
-              setUsername={setUsername}
-              password={password}
-              setPassword={setPassword}
-            />
-          )
+          <div className="flex justify-center items-center min-h-full">
+            <form
+              onSubmit={handleLogin}
+              className="max-w-md w-full p-6 bg-white shadow-md rounded-lg text-lg font-medium"
+            >
+              <h2 className="text-2xl font-bold mb-6">Login</h2>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Username</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="form-input w-full"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="form-input w-full"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Login
+              </button>
+            </form>
+          </div>
         )}
         <Form />
       </main>

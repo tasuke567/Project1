@@ -37,17 +37,24 @@ def upload_model():
 
 @app.route('/tune_model', methods=['POST'])
 def tune_model():
-    if 'dataset' not in request.files:
+    if 'dataset' not in request.files and 'existingDataset' not in request.form:
         return jsonify({"error": "No dataset file provided"}), 400
+
+    # Use the existing dataset if provided
+    if 'existingDataset' in request.form:
+        dataset_name = request.form['existingDataset']
+        # Load the dataset from a predefined location
+        dataset_file = os.path.join('datasets', dataset_name)
+        df = pd.read_csv(dataset_file)
+    else:
+        # Load dataset from the uploaded file
+        dataset_file = request.files['dataset']
+        df = pd.read_csv(dataset_file)
 
     # Extract hyperparameters from form data
     max_depth = request.form.get('max_depth', default=None, type=int)
     min_samples_split = request.form.get('min_samples_split', default=2, type=int)
     min_samples_leaf = request.form.get('min_samples_leaf', default=1, type=int)
-
-    # Load dataset from the uploaded file
-    dataset_file = request.files['dataset']
-    df = pd.read_csv(dataset_file)
 
     # Handle missing values
     df.fillna('Unknown', inplace=True)
@@ -142,7 +149,6 @@ def tune_model():
     }
 
     return jsonify(response)
-
 def load_model():
     with open('model.pkl', 'rb') as f:
         return pickle.load(f)

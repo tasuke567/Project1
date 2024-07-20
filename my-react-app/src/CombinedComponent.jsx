@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 
-const UploadModel = () => {
+const CombinedComponent = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [existingDataset, setExistingDataset] = useState("");
+  const [maxDepth, setMaxDepth] = useState("");
+  const [minSamplesSplit, setMinSamplesSplit] = useState(2);
+  const [minSamplesLeaf, setMinSamplesLeaf] = useState(1);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -20,6 +23,10 @@ const UploadModel = () => {
     } else {
       formData.append("existingDataset", existingDataset);
     }
+    formData.append("max_depth", maxDepth);
+    formData.append("min_samples_split", minSamplesSplit);
+    formData.append("min_samples_leaf", minSamplesLeaf);
+
     try {
       const response = await fetch("/tune_model", {
         method: "POST",
@@ -34,7 +41,7 @@ const UploadModel = () => {
 
   return (
     <div className="container mx-auto p-6 bg-white shadow-md rounded-lg text-lg font-medium">
-      <h2 className="text-2xl font-bold mb-6">Upload Model</h2>
+      <h2 className="text-2xl font-bold mb-6">Tune Model</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700 mb-2">
@@ -60,6 +67,36 @@ const UploadModel = () => {
             className="form-input w-full"
           />
         </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Max Depth</label>
+          <input
+            type="number"
+            value={maxDepth}
+            onChange={(e) => setMaxDepth(e.target.value)}
+            className="form-input w-full"
+            placeholder="Leave empty for default"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Min Samples Split</label>
+          <input
+            type="number"
+            value={minSamplesSplit}
+            onChange={(e) => setMinSamplesSplit(e.target.value)}
+            className="form-input w-full"
+            min="2"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Min Samples Leaf</label>
+          <input
+            type="number"
+            value={minSamplesLeaf}
+            onChange={(e) => setMinSamplesLeaf(e.target.value)}
+            className="form-input w-full"
+            min="1"
+          />
+        </div>
         <button
           type="submit"
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -71,4 +108,4 @@ const UploadModel = () => {
   );
 };
 
-export default UploadModel;
+export default CombinedComponent;
