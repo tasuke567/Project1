@@ -228,7 +228,7 @@ function Form() {
               <div className="border-b border-gray-900/10 pb-12">
                 <div className="mt-10 space-y-10">
                   <fieldset>
-                    <legend className="text-sm font-semibold leading-6 text-gray-900">
+                    <legend className="text-xl font-semibold leading-6 text-gray-900">
                       แบบสอบถามเกี่ยวกับสมาร์ทโฟน
                     </legend>
                     <div className="mt-6 space-y-6">

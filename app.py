@@ -1,57 +1,70 @@
-import os
-import joblib
-import pandas as pd
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+import pickle
+import os
 
-# Load the model and feature names
-model, feature_names = joblib.load('./mnt/data/model.pkl')
-
-# Initialize the Flask app
 app = Flask(__name__)
-CORS(app)
-#gg
+
 @app.route('/predict', methods=['POST'])
 def predict():
-    try:
-        data = request.get_json(force=True)
-        df = pd.DataFrame(data)
-        
-        # Ensure the feature names match
-        for col in feature_names:
-            if col not in df.columns:
-                df[col] = 0
+    data = request.get_json(force=True)
+    df = pd.DataFrame(data)
+    model = load_model()
+    prediction = model.predict(df)
+    return jsonify(prediction.tolist())
 
-        # Reorder columns to match the feature names used during training
-        df = df[feature_names]
-        
-        # Make prediction
-        prediction = model.predict(df)
-        
-        return jsonify({'prediction': prediction.tolist()})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+@app.route('/upload_model', methods=['POST'])
+def upload_model():
+    if 'model' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['model']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        update_model(filename)
+        return jsonify({"message": "Model updated successfully"}), 200
 
-if __name__ == "__main__":
-    from gunicorn.app.base import BaseApplication
+@app.route('/tune_model', methods=['POST'])
+def tune_model():
+    max_depth = request.json.get('max_depth')
+    min_samples_split = request.json.get('min_samples_split')
+    min_samples_leaf = request.json.get('min_samples_leaf')
+    dataset_file = request.files['dataset']
 
-    class StandaloneApplication(BaseApplication):
-        def __init__(self, app, options=None):
-            self.options = options or {}
-            self.application = app
-            super().__init__()
+    # Read the dataset
+    df = pd.read_csv(dataset_file)
+    X = df.drop('target', axis=1)
+    y = df['target']
 
-        def load_config(self):
-            config = {key: value for key, value in self.options.items()
-                      if key in self.cfg.settings and value is not None}
-            for key, value in config.items():
-                self.cfg.set(key.lower(), value)
+    # Train the model
+    model = DecisionTreeClassifier(
+        max_depth=max_depth,
+        min_samples_split=min_samples_split,
+        min_samples_leaf=min_samples_leaf
+    )
+    model.fit(X, y)
 
-        def load(self):
-            return self.application
+    # Save the model
+    with open('model.pkl', 'wb') as f:
+        pickle.dump(model, f)
 
-    options = {
-        'bind': f"0.0.0.0:{os.environ.get('PORT', 5000)}",
-        'workers': 1,
-    }
-    StandaloneApplication(app, options).run()
+    return jsonify({"message": "Model tuned and saved successfully."})
+
+def load_model():
+    with open('model.pkl', 'rb') as f:
+        return pickle.load(f)
+
+def update_model(filename):
+    with open(filename, 'rb') as f:
+        model = pickle.load(f)
+    with open('model.pkl', 'wb') as f:
+        pickle.dump(model, f)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pkl'}
+
+if __name__ == '__main__':
+    app.config['UPLOAD_FOLDER'] = 'uploads'
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
