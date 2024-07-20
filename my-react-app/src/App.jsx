@@ -33,6 +33,9 @@ function App() {
 
   const handleTuningSubmit = async (data) => {
     const formData = new FormData();
+    formData.append("max_depth", data.maxDepth);
+    formData.append("min_samples_split", data.minSamplesSplit);
+    formData.append("min_samples_leaf", data.minSamplesLeaf);
     formData.append("dataset", data.dataset);
 
     try {
@@ -40,14 +43,7 @@ function App() {
         "https://project1-l0cx.onrender.com/tune_model",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            max_depth: data.maxDepth,
-            min_samples_split: data.minSamplesSplit,
-            min_samples_leaf: data.minSamplesLeaf,
-          }),
+          body: formData,
         }
       );
 
