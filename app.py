@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV, cross_val_score
@@ -10,10 +9,11 @@ from sklearn.metrics import classification_report, accuracy_score, confusion_mat
 import warnings
 import joblib
 import os
-
+from werkzeug.utils import secure_filename
+import pickle
+from flask_cors import CORS
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-
+CORS(app)
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json(force=True)
@@ -37,109 +37,134 @@ def upload_model():
 
 @app.route('/tune_model', methods=['POST'])
 def tune_model():
-    if 'dataset' not in request.files and 'existingDataset' not in request.form:
-        return jsonify({"error": "No dataset file provided"}), 400
+    try:
+        print("Request form data:", request.form)
+        print("Request files:", request.files)
 
-    if 'existingDataset' in request.form:
-        dataset_name = request.form['existingDataset']
-        dataset_file = os.path.join('datasets', dataset_name)
-        df = pd.read_csv(dataset_file)
-    else:
-        dataset_file = request.files['dataset']
-        df = pd.read_csv(dataset_file)
+        dataset_file_path = ""
+        if 'existing_dataset' in request.form and request.form['existing_dataset']:
+            dataset_file_path = os.path.join('datasets', request.form['existing_dataset'])
+            print(f"Checking for dataset file at: {dataset_file_path}")
+            if not os.path.exists(dataset_file_path):
+                return jsonify({"error": f"Dataset file {request.form['existing_dataset']} not found at {dataset_file_path}"}), 400
+            df = pd.read_csv(dataset_file_path)
+        elif 'dataset' in request.files:
+            dataset_file = request.files['dataset']
+            df = pd.read_csv(dataset_file)
+        else:
+            return jsonify({"error": "No dataset file provided"}), 400
 
-    max_depth = request.form.get('max_depth', default=None, type=int)
-    min_samples_split = request.form.get('min_samples_split', default=2, type=int)
-    min_samples_leaf = request.form.get('min_samples_leaf', default=1, type=int)
+        # Extract hyperparameters from form data
+        max_depth = request.form.get('max_depth', default=None, type=int)
+        min_samples_split = request.form.get('min_samples_split', default=2, type=int)
+        min_samples_leaf = request.form.get('min_samples_leaf', default=1, type=int)
 
-    df.fillna('Unknown', inplace=True)
-    threshold = 2
-    y_counts = Counter(df['ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน'])
-    df['ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน'] = df['ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน'].apply(
-        lambda x: 'Other' if y_counts[x] < threshold else x
-    )
+        # Handle missing values
+        df.fillna('Unknown', inplace=True)
 
-    categorical_features = ['เพศ', 'ช่วงอายุ', 'สถานภาพ', 'ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?',
-                            'กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ', 'ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน',
-                            'สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร', 'ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด',
-                            "ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน", "ปัญหาในการซื้อสมาร์ทโฟนออนไลน์",
-                            'รายได้ต่อเดือน', 'อาชีพ']
+        # Combine classes with less than a threshold number of instances into "Other"
+        threshold = 2
+        y_counts = Counter(df['ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน'])
+        df['ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน'] = df['ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน'].apply(
+            lambda x: 'Other' if y_counts[x] < threshold else x
+        )
 
-    for col in categorical_features:
-        df[col] = df[col].astype("category").cat.codes + 1
+        # Convert categorical features to numerical
+        categorical_features = ['เพศ', 'ช่วงอายุ', 'สถานภาพ', 'ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?',
+                                'กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ', 'ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน',
+                                'สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร', 'ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด',
+                                "ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน", "ปัญหาในการซื้อสมาร์ทโฟนออนไลน์",
+                                'รายได้ต่อเดือน', 'อาชีพ']
 
-    X = df.drop('ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน', axis=1)
-    y = df['ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน']
+        for col in categorical_features:
+            df[col] = df[col].astype("category").cat.codes + 1
 
-    y_encoder = LabelEncoder()
-    y = y_encoder.fit_transform(y)
+        # Split data into features and target
+        X = df.drop('ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน', axis=1)
+        y = df['ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน']
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+        # Label encode the target variable
+        y_encoder = LabelEncoder()
+        y = y_encoder.fit_transform(y)
 
-    X_train = X_train.fillna(X_train.mean())
-    X_test = X_test.fillna(X_test.mean())
+        # Split data into training and testing sets (Stratified Sampling)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
-    X_train_encoded = encoder.fit_transform(X_train[categorical_features])
-    X_test_encoded = encoder.transform(X_test[categorical_features])
+        # Handle missing values before encoding
+        X_train = X_train.fillna(X_train.mean())
+        X_test = X_test.fillna(X_test.mean())
 
-    encoded_df_train = pd.DataFrame(X_train_encoded, columns=encoder.get_feature_names_out(categorical_features))
-    encoded_df_test = pd.DataFrame(X_test_encoded, columns=encoder.get_feature_names_out(categorical_features))
+        # One-hot encode categorical features
+        encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+        X_train_encoded = encoder.fit_transform(X_train[categorical_features])
+        X_test_encoded = encoder.transform(X_test[categorical_features])
 
-    X_train = X_train.drop(categorical_features, axis=1).reset_index(drop=True).join(encoded_df_train)
-    X_test = X_test.drop(categorical_features, axis=1).reset_index(drop=True).join(encoded_df_test)
+        # Create dataframes with encoded features
+        encoded_df_train = pd.DataFrame(X_train_encoded, columns=encoder.get_feature_names_out(categorical_features))
+        encoded_df_test = pd.DataFrame(X_test_encoded, columns=encoder.get_feature_names_out(categorical_features))
 
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+        # Drop original categorical features and join encoded features
+        X_train = X_train.drop(categorical_features, axis=1).reset_index(drop=True).join(encoded_df_train)
+        X_test = X_test.drop(categorical_features, axis=1).reset_index(drop=True).join(encoded_df_test)
 
-    smote = SMOTE(random_state=42, k_neighbors=1)
-    X_train, y_train = smote.fit_resample(X_train, y_train)
+        # Feature scaling (StandardScaler)
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
 
-    param_grid = {
-        'max_depth': [max_depth] if max_depth else [None, 10, 20, 30, 40, 50],
-        'min_samples_split': [min_samples_split],
-        'min_samples_leaf': [min_samples_leaf],
-        'class_weight': ['balanced', None]
-    }
+        # Handle class imbalance using SMOTE with a smaller number of neighbors
+        smote = SMOTE(random_state=42, k_neighbors=1)
+        X_train, y_train = smote.fit_resample(X_train, y_train)
 
-    grid_search = GridSearchCV(DecisionTreeClassifier(random_state=42), param_grid, cv=StratifiedKFold(5), n_jobs=-1)
-    grid_search.fit(X_train, y_train)
+        # Hyperparameter tuning using Grid Search
+        param_grid = {
+            'max_depth': [max_depth] if max_depth else [None, 10, 20, 30, 40, 50],
+            'min_samples_split': [min_samples_split],
+            'min_samples_leaf': [min_samples_leaf],
+            'class_weight': ['balanced', None]
+        }
 
-    best_model = grid_search.best_estimator_
+        grid_search = GridSearchCV(DecisionTreeClassifier(random_state=42), param_grid, cv=StratifiedKFold(5), n_jobs=-1)
+        grid_search.fit(X_train, y_train)
 
-    joblib.dump(best_model, 'model.pkl')
+        best_model = grid_search.best_estimator_
 
-    cv_scores = cross_val_score(best_model, X_train, y_train, cv=5)
-    cv_mean = cv_scores.mean()
+        # Save the tuned model
+        joblib.dump(best_model, 'model.pkl')
 
-    y_pred = best_model.predict(X_test)
+        # Evaluate the model using cross-validation
+        cv_scores = cross_val_score(best_model, X_train, y_train, cv=5)
+        cv_mean = cv_scores.mean()
 
-    report = classification_report(y_test, y_pred, target_names=y_encoder.classes_, output_dict=True, zero_division=0)
-    accuracy = accuracy_score(y_test, y_pred)
+        # Predict on test set
+        y_pred = best_model.predict(X_test)
 
-    response = {
-        "message": "Model tuned and saved successfully.",
-        "cross_validation_scores": cv_scores.tolist(),
-        "mean_cross_validation_accuracy": cv_mean,
-        "classification_report": report,
-        "accuracy": accuracy
-    }
+        # Evaluate the model
+        report = classification_report(y_test, y_pred, target_names=y_encoder.classes_, output_dict=True)
+        accuracy = accuracy_score(y_test, y_pred)
 
-    return jsonify(response)
+        response = {
+            "message": "Model tuned and saved successfully.",
+            "cross_validation_scores": cv_scores.tolist(),
+            "mean_cross_validation_accuracy": cv_mean,
+            "classification_report": report,
+            "accuracy": accuracy
+        }
 
-def load_model():
-    with open('model.pkl', 'rb') as f:
-        return joblib.load(f)
+        return jsonify(response)
 
-def update_model(filename):
-    with open(filename, 'rb') as f:
-        model = joblib.load(f)
-    with open('model.pkl', 'wb') as f:
-        joblib.dump(model, f)
+    except Exception as e:
+        print(f"Error during model tuning: {e}")
+        return jsonify({"error": str(e)}), 500
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pkl'}
+
+def update_model(filename):
+    with open(filename, 'rb') as f:
+        model = pickle.load(f)
+    with open('model.pkl', 'wb') as f:
+        pickle.dump(model, f)
 
 if __name__ == '__main__':
     app.config['UPLOAD_FOLDER'] = 'uploads'
