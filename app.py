@@ -1,19 +1,22 @@
 from flask import Flask, request, jsonify
 import pandas as pd
+import joblib
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV, cross_val_score
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, StandardScaler
 from imblearn.over_sampling import SMOTE
 from collections import Counter
-from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+from sklearn.metrics import classification_report, accuracy_score
 import warnings
-import joblib
 import os
-from werkzeug.utils import secure_filename
-import pickle
 from flask_cors import CORS
+
+warnings.filterwarnings('ignore')
+
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
 CORS(app)
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json(force=True)
@@ -38,29 +41,28 @@ def upload_model():
 @app.route('/tune_model', methods=['POST'])
 def tune_model():
     try:
-        print("Request form data:", request.form)
-        print("Request files:", request.files)
-
-        dataset_file_path = ""
-        if 'existing_dataset' in request.form and request.form['existing_dataset']:
-            dataset_file_path = os.path.join('datasets', request.form['existing_dataset'])
-            print(f"Checking for dataset file at: {dataset_file_path}")
-            if not os.path.exists(dataset_file_path):
-                return jsonify({"error": f"Dataset file {request.form['existing_dataset']} not found at {dataset_file_path}"}), 400
-            df = pd.read_csv(dataset_file_path)
-        elif 'dataset' in request.files:
-            dataset_file = request.files['dataset']
-            df = pd.read_csv(dataset_file)
-        else:
-            return jsonify({"error": "No dataset file provided"}), 400
-
         # Extract hyperparameters from form data
         max_depth = request.form.get('max_depth', default=None, type=int)
         min_samples_split = request.form.get('min_samples_split', default=2, type=int)
         min_samples_leaf = request.form.get('min_samples_leaf', default=1, type=int)
+        dataset_name = request.form.get('existing_dataset')
+
+        # Load dataset from file
+        dataset_path = os.path.join('datasets', dataset_name)
+        if not os.path.exists(dataset_path):
+            return jsonify({"error": "Dataset file not found"}), 400
+
+        df = pd.read_csv(dataset_path)
+
+        # Drop unnecessary columns
+        if 'Timestamp' in df.columns and 'Email address' in df.columns:
+            df.drop(['Timestamp', 'Email address'], axis=1, inplace=True)
 
         # Handle missing values
-        df.fillna('Unknown', inplace=True)
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col].fillna('Unknown', inplace=True)
+        for col in df.select_dtypes(exclude=['object']).columns:
+            df[col].fillna(df[col].mean(), inplace=True)
 
         # Combine classes with less than a threshold number of instances into "Other"
         threshold = 2
@@ -89,10 +91,6 @@ def tune_model():
 
         # Split data into training and testing sets (Stratified Sampling)
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-
-        # Handle missing values before encoding
-        X_train = X_train.fillna(X_train.mean())
-        X_test = X_test.fillna(X_test.mean())
 
         # One-hot encode categorical features
         encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
@@ -148,23 +146,26 @@ def tune_model():
             "cross_validation_scores": cv_scores.tolist(),
             "mean_cross_validation_accuracy": cv_mean,
             "classification_report": report,
-            "accuracy": accuracy
+            "accuracy": accuracy,
         }
 
         return jsonify(response)
 
     except Exception as e:
-        print(f"Error during model tuning: {e}")
         return jsonify({"error": str(e)}), 500
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pkl'}
+def load_model():
+    with open('model.pkl', 'rb') as f:
+        return joblib.load(f)
 
 def update_model(filename):
     with open(filename, 'rb') as f:
-        model = pickle.load(f)
+        model = joblib.load(f)
     with open('model.pkl', 'wb') as f:
-        pickle.dump(model, f)
+        joblib.dump(model, f)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pkl'}
 
 if __name__ == '__main__':
     app.config['UPLOAD_FOLDER'] = 'uploads'
