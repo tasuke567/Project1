@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort  # Include 'abort' in the import
+
 import pandas as pd
 import joblib
 from sklearn.tree import DecisionTreeClassifier
@@ -10,20 +11,40 @@ from sklearn.metrics import classification_report, accuracy_score
 import warnings
 import os
 from flask_cors import CORS
+import logging
 
 warnings.filterwarnings('ignore')
-
+# Load the model and feature names
+model, feature_names = joblib.load('./model.pkl')
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 CORS(app)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json(force=True)
-    df = pd.DataFrame(data)
-    model = load_model()
-    prediction = model.predict(df)
-    return jsonify(prediction.tolist())
+    try:
+        data = request.get_json(force=True)
+        
+        # Ensure data is a list of dictionaries
+        if isinstance(data, dict):
+            data = [data]
+        
+        df = pd.DataFrame(data)
+        
+        # Ensure the feature names match
+        for col in feature_names:
+            if col not in df.columns:
+                df[col] = 0
+
+        # Reorder columns to match the feature names used during training
+        df = df[feature_names]
+        
+        # Make prediction
+        prediction = model.predict(df)
+        
+        return jsonify({'prediction': prediction.tolist()})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/upload_model', methods=['POST'])
 def upload_model():
@@ -156,7 +177,7 @@ def tune_model():
 
 def load_model():
     with open('model.pkl', 'rb') as f:
-        return joblib.load(f)
+        return (model, config)
 
 def update_model(filename):
     with open(filename, 'rb') as f:
