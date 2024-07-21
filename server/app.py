@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, abort  # Include 'abort' in the import
-
 import pandas as pd
 import joblib
 from sklearn.tree import DecisionTreeClassifier
@@ -18,7 +17,11 @@ warnings.filterwarnings('ignore')
 model, feature_names = joblib.load('./model.pkl')
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['DATASETS_FOLDER'] = 'datasets'
 CORS(app)
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -62,16 +65,24 @@ def upload_model():
 @app.route('/tune_model', methods=['POST'])
 def tune_model():
     try:
+        logging.debug("Received request to tune model")
+
         # Extract hyperparameters from form data
         max_depth = request.form.get('max_depth', default=None, type=int)
         min_samples_split = request.form.get('min_samples_split', default=2, type=int)
         min_samples_leaf = request.form.get('min_samples_leaf', default=1, type=int)
-        dataset_name = request.form.get('existing_dataset')
+        dataset_file = request.files.get('dataset')
 
-        # Load dataset from file
-        dataset_path = os.path.join('datasets', dataset_name)
-        if not os.path.exists(dataset_path):
+        logging.debug(f"max_depth: {max_depth}, min_samples_split: {min_samples_split}, min_samples_leaf: {min_samples_leaf}")
+
+        if not dataset_file:
+            logging.error("Dataset file not found in request")
             return jsonify({"error": "Dataset file not found"}), 400
+
+        dataset_path = os.path.join(app.config['UPLOAD_FOLDER'], dataset_file.filename)
+        dataset_file.save(dataset_path)
+
+        logging.debug(f"Dataset saved to {dataset_path}")
 
         df = pd.read_csv(dataset_path)
 
@@ -173,11 +184,20 @@ def tune_model():
         return jsonify(response)
 
     except Exception as e:
+        logging.error(f"Error during model tuning: {e}")
         return jsonify({"error": str(e)}), 500
 
 def load_model():
     with open('model.pkl', 'rb') as f:
         return (model, config)
+    
+@app.route('/datasets', methods=['GET'])
+def list_datasets():
+    try:
+        datasets = os.listdir(app.config['DATASETS_FOLDER'])
+        return jsonify(datasets)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 def update_model(filename):
     with open(filename, 'rb') as f:
