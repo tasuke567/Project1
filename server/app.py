@@ -17,7 +17,7 @@ warnings.filterwarnings('ignore')
 model, feature_names = joblib.load('./model.pkl')
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['DATASETS_FOLDER'] = 'datasets'
+app.config['DATASETS_FOLDER'] = './datasets'
 CORS(app)
 
 # Configure logging
@@ -62,29 +62,63 @@ def upload_model():
         update_model(filename)
         return jsonify({"message": "Model updated successfully"}), 200
 
-@app.route('/tune_model', methods=['POST'])
-def tune_model():
+# @app.route('/tune_model', methods=['POST'])
+# def tune_model():
     try:
-        logging.debug("Received request to tune model")
-
-        # Extract hyperparameters from form data
         max_depth = request.form.get('max_depth', default=None, type=int)
         min_samples_split = request.form.get('min_samples_split', default=2, type=int)
         min_samples_leaf = request.form.get('min_samples_leaf', default=1, type=int)
-        dataset_file = request.files.get('dataset')
+        dataset_name = request.form.get('dataset', default=None)
 
-        logging.debug(f"max_depth: {max_depth}, min_samples_split: {min_samples_split}, min_samples_leaf: {min_samples_leaf}")
+        if not dataset_name:
+            return jsonify({"error": "No dataset provided"}), 400
 
-        if not dataset_file:
-            logging.error("Dataset file not found in request")
+        # Load dataset from file
+        dataset_path = os.path.join('datasets', dataset_name)
+        if not os.path.exists(dataset_path):
             return jsonify({"error": "Dataset file not found"}), 400
 
-        dataset_path = os.path.join(app.config['UPLOAD_FOLDER'], dataset_file.filename)
-        dataset_file.save(dataset_path)
-
-        logging.debug(f"Dataset saved to {dataset_path}")
-
+        # Load dataset from file
         df = pd.read_csv(dataset_path)
+
+        return jsonify(response);
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/tune_model', methods=['POST'])
+def tune_model():
+    try:
+        logging.debug(f"Received form data: {request.form}")
+        max_depth = request.form.get('max_depth')
+        min_samples_split = request.form.get('min_samples_split')
+        min_samples_leaf = request.form.get('min_samples_leaf')
+        datasets = request.form.getlist('existing_dataset[]')  # This should match client-side FormData
+
+        if 'dataset' not in request.form:
+            return jsonify({"error": "No dataset provided"}), 400
+        
+        dataset_name = request.form['dataset']
+        results = []
+        
+        
+        dataset_path = os.path.join(app.config['DATASETS_FOLDER'], dataset_name)
+        
+        
+       # ตรวจสอบว่าไฟล์ dataset มีอยู่จริงหรือไม่
+        if not os.path.exists(dataset_path):
+            return jsonify({"error": f"Dataset file {dataset_name} not found"}), 404
+
+        # ดึงค่าพารามิเตอร์อื่นๆ
+        max_depth = int(request.form.get('max_depth', 30))
+        min_samples_split = int(request.form.get('min_samples_split', 2))
+        min_samples_leaf = int(request.form.get('min_samples_leaf', 1))
+
+        
+        logging.debug(f"Received form data: {request.form}")
+        # Load dataset from file
+        df = pd.read_csv(dataset_path)
+
 
         # Drop unnecessary columns
         if 'Timestamp' in df.columns and 'Email address' in df.columns:
@@ -181,7 +215,7 @@ def tune_model():
             "accuracy": accuracy,
         }
 
-        return jsonify(response)
+        return jsonify({"message": "Model tuned successfully"}), 200
 
     except Exception as e:
         logging.error(f"Error during model tuning: {e}")
