@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import Modal from "react-modal";
 import SmartphonePrediction from "./components/SmartphonePrediction";
+const API_URL = import.meta.env.VITE_API_URL ;
 function Form() {
   const [formData, setFormData] = useState({
     gender: "",
@@ -178,7 +179,7 @@ function Form() {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/predict",
+        `${API_URL}/predict`,
         {
           method: "POST",
           headers: {

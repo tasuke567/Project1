@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
+const API_URL = import.meta.env.VITE_API_URL;
 import TrainingResults from "./TrainingResults";
 function TuningForm({ onSubmit }) {
   const [result, setResult] = useState(null);
@@ -12,7 +12,7 @@ function TuningForm({ onSubmit }) {
   const [availableDatasets, setAvailableDatasets] = useState([]);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:5000/datasets`)
+    fetch(`${API_URL}/datasets`)
       .then((response) => response.json())
       .then((data) => setAvailableDatasets(data))
       .catch((error) => console.error("Error fetching datasets:", error));
@@ -68,7 +68,7 @@ function TuningForm({ onSubmit }) {
     formData.append("min_samples_leaf", tuningData.minSamplesLeaf);
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/tune_model`, {
+      const response = await fetch(`${API_URL}/tune_model`, {
         method: "POST",
         body: formData,
       });
