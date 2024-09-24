@@ -11,6 +11,7 @@ import warnings
 import os
 from flask_cors import CORS
 import logging
+from werkzeug.utils import secure_filename
 
 warnings.filterwarnings('ignore')
 # Load the model and feature names
@@ -49,6 +50,25 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+def allowed_dataset_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'csv', 'xlsx', 'xls'}
+
+@app.route('/upload_dataset', methods=['POST'])
+def upload_dataset():
+    if 'dataset' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['dataset']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file and allowed_dataset_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['DATASETS_FOLDER'], filename))
+        return jsonify({"message": "Dataset uploaded successfully"}), 200
+    else:
+        return jsonify({"error": "Invalid file type. Allowed types are CSV, XLSX, and XLS."}), 400
+
+
 @app.route('/upload_model', methods=['POST'])
 def upload_model():
     if 'model' not in request.files:
@@ -64,27 +84,27 @@ def upload_model():
 
 # @app.route('/tune_model', methods=['POST'])
 # def tune_model():
-    try:
-        max_depth = request.form.get('max_depth', default=None, type=int)
-        min_samples_split = request.form.get('min_samples_split', default=2, type=int)
-        min_samples_leaf = request.form.get('min_samples_leaf', default=1, type=int)
-        dataset_name = request.form.get('dataset', default=None)
+    # try:
+    #     max_depth = request.form.get('max_depth', default=None, type=int)
+    #     min_samples_split = request.form.get('min_samples_split', default=2, type=int)
+    #     min_samples_leaf = request.form.get('min_samples_leaf', default=1, type=int)
+    #     dataset_name = request.form.get('dataset', default=None)
 
-        if not dataset_name:
-            return jsonify({"error": "No dataset provided"}), 400
+    #     if not dataset_name:
+    #         return jsonify({"error": "No dataset provided"}), 400
 
-        # Load dataset from file
-        dataset_path = os.path.join('datasets', dataset_name)
-        if not os.path.exists(dataset_path):
-            return jsonify({"error": "Dataset file not found"}), 400
+    #     # Load dataset from file
+    #     dataset_path = os.path.join('datasets', dataset_name)
+    #     if not os.path.exists(dataset_path):
+    #         return jsonify({"error": "Dataset file not found"}), 400
 
-        # Load dataset from file
-        df = pd.read_csv(dataset_path)
+    #     # Load dataset from file
+    #     df = pd.read_csv(dataset_path)
 
-        return jsonify(response);
+    #     return jsonify(response);
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # except Exception as e:
+    #     return jsonify({"error": str(e)}), 500
 
 @app.route('/tune_model', methods=['POST'])
 def tune_model():
@@ -95,15 +115,19 @@ def tune_model():
         min_samples_leaf = request.form.get('min_samples_leaf')
         datasets = request.form.getlist('existing_dataset[]')  # This should match client-side FormData
 
-        if 'dataset' not in request.form:
-            return jsonify({"error": "No dataset provided"}), 400
+        required_params = ['max_depth', 'min_samples_split', 'min_samples_leaf', 'dataset']
+        for param in required_params:
+            if param not in request.form:
+                return jsonify({"error": f"Missing required parameter: {param}"}), 400
+
         
         dataset_name = request.form['dataset']
+        logging.debug(f"Received dataset name: {dataset_name}") 
         results = []
         
         
-        dataset_path = os.path.join(app.config['DATASETS_FOLDER'], dataset_name)
-        
+        datasets_folder = os.path.abspath(app.config['DATASETS_FOLDER']) 
+        dataset_path = os.path.join(datasets_folder, dataset_name)
         
        # ตรวจสอบว่าไฟล์ dataset มีอยู่จริงหรือไม่
         if not os.path.exists(dataset_path):
@@ -217,6 +241,12 @@ def tune_model():
 
         return jsonify({"message": "Model tuned successfully"}), 200
 
+    except FileNotFoundError:
+        logging.error(f"Dataset file {dataset_name} not found")
+        return jsonify({"error": f"Dataset file {dataset_name} not found"}), 404
+    except pd.errors.EmptyDataError:
+        logging.error(f"Dataset file {dataset_name} is empty")
+        return jsonify({"error": f"Dataset file {dataset_name} is empty"}), 400
     except Exception as e:
         logging.error(f"Error during model tuning: {e}")
         return jsonify({"error": str(e)}), 500
