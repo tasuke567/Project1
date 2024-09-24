@@ -243,7 +243,7 @@ def tune_model():
             "accuracy": accuracy,
         }
 
-        return jsonify({"message": "Model tuned successfully"}), 200
+        return jsonify(response), 200
 
     except FileNotFoundError:
         logging.error(f"Dataset file {dataset_name} not found")
@@ -263,7 +263,11 @@ def load_model():
 def list_datasets():
     try:
         datasets = os.listdir(app.config['DATASETS_FOLDER'])
+        logging.debug(f"Datasets found: {datasets}") 
         return jsonify(datasets)
+    except FileNotFoundError:
+        logging.error(f"Datasets folder not found at {app.config['DATASETS_FOLDER']}")
+        return jsonify({"error": "Datasets folder not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

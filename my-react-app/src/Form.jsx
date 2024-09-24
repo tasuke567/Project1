@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import Modal from "react-modal";
-
+import SmartphonePrediction from "./components/SmartphonePrediction";
 function Form() {
   const [formData, setFormData] = useState({
     gender: "",
@@ -178,7 +178,7 @@ function Form() {
 
     try {
       const response = await fetch(
-        "https://project1-l0cx.onrender.com/predict",
+        "http://127.0.0.1:5000/predict",
         {
           method: "POST",
           headers: {
@@ -210,14 +210,30 @@ function Form() {
     setModalIsOpen(false); // Close modal
   };
 
-  const brandMapping = {
-    0: "Apple",
-    1: "Samsung",
-    2: "Oppo",
-    3: "Vivo",
-    4: "Xiaomi",
-    5: "Other",
-  };
+  function mapSmartphoneBrand(brand) {
+    const brandMapping = {
+      0: "Apple",
+      1: "Samsung",
+      2: "Oppo",
+      3: "Vivo",
+      4: "Xiaomi",
+      5: "Oppo",
+    };
+
+    if (brand in brandMapping) {
+      return brandMapping[brand];
+    } else if (brand === 6) {
+      return "Vivo"; // Realme mapped to Vivo
+    } else if (brand === 7) {
+      return "Vivo";
+    } else if (brand === 8 || brand === 9 || brand === 11) {
+      return "Huawei";
+    } else if (brand === 10 || brand === 12) {
+      return "Infinix";
+    } else {
+      return "Unknown"; // For any other cases
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -1125,71 +1141,26 @@ function Form() {
                         ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน *
                       </label>
                       <div className="space-y-4">
-                        <div className="flex items-center gap-x-3">
-                          <label className="flex items-center gap-x-3">
-                            <input
-                              type="radio"
-                              name="currentBrand"
-                              value="Apple"
-                              checked={formData.currentBrand === "Apple"}
-                              onChange={handleChange}
-                              className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                            />
-                            Apple
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-x-3">
-                          <label className="flex items-center gap-x-3">
-                            <input
-                              type="radio"
-                              name="currentBrand"
-                              value="Samsung"
-                              checked={formData.currentBrand === "Samsung"}
-                              onChange={handleChange}
-                              className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                            />
-                            Samsung
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-x-3">
-                          <label className="flex items-center gap-x-3">
-                            <input
-                              type="radio"
-                              name="currentBrand"
-                              value="Oppo"
-                              checked={formData.currentBrand === "Oppo"}
-                              onChange={handleChange}
-                              className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                            />
-                            Oppo
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-x-3">
-                          <label className="flex items-center gap-x-3">
-                            <input
-                              type="radio"
-                              name="currentBrand"
-                              value="Vivo"
-                              checked={formData.currentBrand === "Vivo"}
-                              onChange={handleChange}
-                              className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                            />
-                            Vivo
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-x-3">
-                          <label className="flex items-center gap-x-3">
-                            <input
-                              type="radio"
-                              name="currentBrand"
-                              value="Xiaomi"
-                              checked={formData.currentBrand === "Xiaomi"}
-                              onChange={handleChange}
-                              className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                            />
-                            Xiaomi
-                          </label>
-                        </div>
+                        {["Apple", "Samsung", "Oppo", "Vivo", "Xiaomi"].map(
+                          (brand) => (
+                            <div
+                              key={brand}
+                              className="flex items-center gap-x-3"
+                            >
+                              <label className="flex items-center gap-x-3">
+                                <input
+                                  type="radio"
+                                  name="currentBrand"
+                                  value={brand}
+                                  checked={formData.currentBrand === brand}
+                                  onChange={handleChange}
+                                  className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                />
+                                {brand}
+                              </label>
+                            </div>
+                          )
+                        )}
                         <div className="flex items-center gap-x-3">
                           <label className="flex items-center gap-x-3">
                             <input
@@ -1202,6 +1173,16 @@ function Form() {
                             />
                             Other
                           </label>
+                          {formData.currentBrand === "Other" && (
+                            <input
+                              type="text"
+                              name="otherBrand"
+                              value={formData.otherBrand || ""}
+                              onChange={handleChange}
+                              placeholder="โปรดระบุยี่ห้อ"
+                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                            />
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1229,7 +1210,7 @@ function Form() {
         ) : null}
       </div>
       {loading && (
-        <div className="flex justify-center m-1">
+        <div className="">
           <ClipLoader color="#3498db" loading={loading} size={50} />
         </div>
       )}
@@ -1238,16 +1219,10 @@ function Form() {
         onRequestClose={handleNewPrediction}
         className="flex items-center justify-center fixed inset-0 bg-gray-800 bg-opacity-75"
       >
-        <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-          <h2 className="text-xl font-bold">ผลการพยากรณ์:</h2>
-          <p>ยี่ห้อสมาร์ทโฟนที่ท่านควรเลือกคือ: {brandMapping[prediction]}</p>
-          <button
-            onClick={handleNewPrediction}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-          >
-            พยากรณ์ใหม่
-          </button>
-        </div>
+        <SmartphonePrediction
+          prediction={prediction}
+          handleNewPrediction={handleNewPrediction}
+        />
       </Modal>
     </div>
   );

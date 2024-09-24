@@ -4,6 +4,7 @@ import "./style/output.css";
 import Form from "./Form";
 import NavBar from "./NavBar"
 import LoginForm from "./LoginForm";
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
