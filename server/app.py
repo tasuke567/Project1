@@ -27,6 +27,7 @@ logging.basicConfig(level=logging.DEBUG)
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
+        logging.info("Received a prediction request")
         data = request.get_json(force=True)
         
         # Ensure data is a list of dictionaries
@@ -46,8 +47,11 @@ def predict():
         # Make prediction
         prediction = model.predict(df)
         
+        logging.info(f"Prediction result: {prediction.tolist()}")
+        
         return jsonify({'prediction': prediction.tolist()})
     except Exception as e:
+        logging.error(f"Error during prediction: {e}")
         return jsonify({'error': str(e)}), 500
 
 def allowed_dataset_file(filename):
