@@ -46,9 +46,9 @@ const TrainingResults = ({ results, error }) => {
       </div>
 
       {/* Classification Report */}
-      <div className="mb-4">
+      <div className="mb-4" style={{ overflowX: 'auto' }}>
         <h3 className="text-xl font-semibold">Classification Report:</h3>
-        <table className="min-w-full bg-white border border-gray-300">
+        <table className="min-w-full bg-white border border-gray-300 ">
           <thead>
             <tr className="bg-gray-100">
               <th className="border p-2">Class</th>
