@@ -10,7 +10,7 @@ const SmartphonePrediction = ({ prediction, handleNewPrediction }) => {
     5: "Oppo",
     6: "Vivo", 
     7: "Vivo",
-    8: "Huawei",
+    8: "Apple",
     9: "Huawei",
     10: "Infinix",
     11: "Huawei",
