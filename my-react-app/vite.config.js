@@ -7,4 +7,9 @@ export default defineConfig({
   build: {
     outDir: "dist", // ตั้งค่าให้ build ไฟล์ไปที่โฟลเดอร์ dist
   },
+  test: {
+    globals: true,
+    environment: "happy-dom",
+    setupFiles: "./src/Form.test.jsx",
+  },
 });

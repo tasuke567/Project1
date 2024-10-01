@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import Modal from "react-modal";
 import SmartphonePrediction from "./components/SmartphonePrediction";
+import styles from './style/Loading.module.css';
+
 const API_URL = import.meta.env.VITE_API_URL ;
 function Form() {
   const [formData, setFormData] = useState({
@@ -41,7 +43,7 @@ function Form() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
+   
     const data = {
       เพศ_1: formData.gender === "ชาย" ? 1 : 0,
       เพศ_2: formData.gender === "หญิง" ? 1 : 0,
@@ -176,6 +178,16 @@ function Form() {
       ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน_6:
         formData.currentBrand === "Other" ? 1 : 0,
     };
+    if (!formData.gender || !formData.ageRange || !formData.maritalStatus || !formData.occupation
+      || !formData.apps || !formData.income || !formData.activities || !formData.dailyUsage
+      || !formData.importance || !formData.purchaseFactors || !formData.satisfaction
+      || !formData.onlinePurchaseIssues || !formData.currentBrand
+     ) {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+      setLoading(false);
+      return;
+    } 
+    setLoading(true);
 
     try {
       const response = await fetch(
@@ -199,9 +211,20 @@ function Form() {
       setModalIsOpen(true); // Open modal
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while processing your request.");
+      // ตรวจสอบชนิดของข้อผิดพลาดและแสดงข้อความที่เหมาะสม
+      if (error.response && error.response.status === 400) {
+        // ข้อผิดพลาดจากการตรวจสอบความถูกต้องของข้อมูล
+        const errorData = await error.response.json();
+        alert("ข้อมูลไม่ถูกต้อง: " + errorData.message); 
+      } else if (error.response && error.response.status === 500) {
+        // ข้อผิดพลาดจากเซิร์ฟเวอร์
+        alert("เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ โปรดลองอีกครั้งภายหลัง");
+      } else {
+        // ข้อผิดพลาดอื่นๆ เช่น เครือข่ายขัดข้อง
+        alert("เกิดข้อผิดพลาดขณะประมวลผลคำขอของคุณ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ");
+      }
     } finally {
-      setLoading(false); // End loading
+      // ...
     }
   };
 
@@ -211,30 +234,6 @@ function Form() {
     setModalIsOpen(false); // Close modal
   };
 
-  function mapSmartphoneBrand(brand) {
-    const brandMapping = {
-      0: "Apple",
-      1: "Samsung",
-      2: "Oppo",
-      3: "Vivo",
-      4: "Xiaomi",
-      5: "Oppo",
-    };
-
-    if (brand in brandMapping) {
-      return brandMapping[brand];
-    } else if (brand === 6) {
-      return "Vivo"; // Realme mapped to Vivo
-    } else if (brand === 7) {
-      return "Vivo";
-    } else if (brand === 8 || brand === 9 || brand === 11) {
-      return "Huawei";
-    } else if (brand === 10 || brand === 12) {
-      return "Infinix";
-    } else {
-      return "Unknown"; // For any other cases
-    }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

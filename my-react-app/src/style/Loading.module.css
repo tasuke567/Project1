@@ -1,0 +1,17 @@
+/* Loading.module.css */
+.loadingOverlay {
+    position: absolute; /* หรือ absolute ถ้าต้องการให้วางทับเฉพาะส่วนของหน้าจอ */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* พื้นหลังสีเทาโปร่งแสง */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* ให้แน่ใจว่า loading อยู่บนสุด */
+  }
+  
+  .spinner {
+    /* กำหนดสไตล์ของ spinner ตามที่คุณต้องการ */
+  }

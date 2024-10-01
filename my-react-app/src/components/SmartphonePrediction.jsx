@@ -21,7 +21,17 @@ const SmartphonePrediction = ({ prediction, handleNewPrediction }) => {
   return (
     <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
       <h2 className="text-xl font-bold">ผลการพยากรณ์:</h2>
-      <p>ยี่ห้อสมาร์ทโฟนที่ท่านควรเลือกคือ: {brandMapping[prediction]|| "Unknown"}</p>
+      {prediction !== null ? (
+        <div>
+          <p>
+            ยี่ห้อสมาร์ทโฟนที่ท่านควรเลือกคือ:{" "}
+            <span className="font-bold">{brandMapping[prediction]}</span>
+          </p>
+          {/* สามารถเพิ่มรูปภาพหรือรายละเอียดเพิ่มเติมเกี่ยวกับยี่ห้อที่นี่ */}
+        </div>
+      ) : (
+        <p>กำลังรอผลการทำนาย...</p>
+      )}
       <button
         onClick={handleNewPrediction}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
