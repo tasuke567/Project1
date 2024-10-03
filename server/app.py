@@ -15,7 +15,9 @@ from werkzeug.utils import secure_filename
 
 warnings.filterwarnings('ignore')
 # Load the model and feature names
-model, feature_names = joblib.load('./model.pkl')
+model_data = joblib.load('./model/random_forest_model.joblib')
+model = model_data['model']
+feature_names = model_data['feature_names']
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['DATASETS_FOLDER'] = './datasets'
@@ -29,30 +31,42 @@ def predict():
     try:
         logging.info("Received a prediction request")
         data = request.get_json(force=True)
-        
-        # Ensure data is a list of dictionaries
+
+        # ตรวจสอบว่ามี feature_names ใน model_data หรือไม่
+        if 'feature_names' in model_data:
+            feature_names = model_data['feature_names']
+        else:
+            raise KeyError("'feature_names' key not found in model data")
+
+        # ตรวจสอบว่า data เป็น dict หรือไม่
         if isinstance(data, dict):
             data = [data]
-        
+
         df = pd.DataFrame(data)
-        
-        # Ensure the feature names match
+
+        # ตรวจสอบให้แน่ใจว่าฟีเจอร์ที่จำเป็นมีอยู่
         for col in feature_names:
             if col not in df.columns:
-                df[col] = 0
+                df[col] = 0  # เพิ่มคอลัมน์ใหม่ด้วยค่า 0 ถ้าขาด
 
-        # Reorder columns to match the feature names used during training
-        df = df[feature_names]
-        
-        # Make prediction
+        # จัดเรียงคอลัมน์ให้ตรงตามชื่อฟีเจอร์ที่ใช้ในการฝึก
+        df = df.reindex(columns=feature_names, fill_value=0)
+
+        # ตรวจสอบจำนวนฟีเจอร์
+        if df.shape[1] != len(feature_names):
+            raise ValueError(f"Input data has {df.shape[1]} features, but the model expects {len(feature_names)} features.")
+
+        # คาดการณ์ผลลัพธ์
         prediction = model.predict(df)
-        
+
         logging.info(f"Prediction result: {prediction.tolist()}")
         
         return jsonify({'prediction': prediction.tolist()})
+
     except Exception as e:
         logging.error(f"Error during prediction: {e}")
         return jsonify({'error': str(e)}), 500
+
 
 def allowed_dataset_file(filename):
     return '.' in filename and \
