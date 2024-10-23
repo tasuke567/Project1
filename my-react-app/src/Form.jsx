@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, memo } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import Modal from "react-modal";
 import SmartphonePrediction from "./components/SmartphonePrediction";
-import styles from './style/Loading.module.css';
+import styles from "./style/Loading.module.css";
 
-const API_URL = import.meta.env.VITE_API_URL ;
+const API_URL = import.meta.env.VITE_API_URL;
 function Form() {
   const [formData, setFormData] = useState({
     gender: "",
@@ -22,10 +22,11 @@ function Form() {
     currentBrand: "",
   });
 
-  const [prediction, setPrediction] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [prediction, setPrediction] = useState(null);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -41,9 +42,30 @@ function Form() {
     }
   };
 
+  const validateForm = () => {
+    if (
+      !formData.gender ||
+      !formData.ageRange ||
+      !formData.maritalStatus ||
+      !formData.occupation ||
+      !formData.apps ||
+      !formData.income ||
+      !formData.activities ||
+      !formData.dailyUsage ||
+      !formData.importance ||
+      !formData.purchaseFactors ||
+      !formData.satisfaction ||
+      !formData.onlinePurchaseIssues ||
+      !formData.currentBrand
+    ) {
+      setErrorMessage("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return false;
+    }
+    return true;
+  };
   const handleSubmit = async (event) => {
     event.preventDefault();
-   
+
     const data = {
       เพศ_1: formData.gender === "ชาย" ? 1 : 0,
       เพศ_2: formData.gender === "หญิง" ? 1 : 0,
@@ -178,28 +200,20 @@ function Form() {
       ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน_6:
         formData.currentBrand === "Other" ? 1 : 0,
     };
-    if (!formData.gender || !formData.ageRange || !formData.maritalStatus || !formData.occupation
-      || !formData.apps || !formData.income || !formData.activities || !formData.dailyUsage
-      || !formData.importance || !formData.purchaseFactors || !formData.satisfaction
-      || !formData.onlinePurchaseIssues || !formData.currentBrand
-     ) {
-      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-      setLoading(false);
+    if (!validateForm()) {
       return;
-    } 
+    }
+    setErrorMessage("");
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${API_URL}/predict`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify([data]), // Send data as an array
-        }
-      );
+      const response = await fetch(`${API_URL}/predict`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify([data]), // Send data as an array
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -210,21 +224,24 @@ function Form() {
       setFormSubmitted(true);
       setModalIsOpen(true); // Open modal
     } catch (error) {
+      setErrorMessage("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
       console.error("Error:", error);
       // ตรวจสอบชนิดของข้อผิดพลาดและแสดงข้อความที่เหมาะสม
       if (error.response && error.response.status === 400) {
         // ข้อผิดพลาดจากการตรวจสอบความถูกต้องของข้อมูล
         const errorData = await error.response.json();
-        alert("ข้อมูลไม่ถูกต้อง: " + errorData.message); 
+        alert("ข้อมูลไม่ถูกต้อง: " + errorData.message);
       } else if (error.response && error.response.status === 500) {
         // ข้อผิดพลาดจากเซิร์ฟเวอร์
         alert("เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ โปรดลองอีกครั้งภายหลัง");
       } else {
         // ข้อผิดพลาดอื่นๆ เช่น เครือข่ายขัดข้อง
-        alert("เกิดข้อผิดพลาดขณะประมวลผลคำขอของคุณ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ");
+        alert(
+          "เกิดข้อผิดพลาดขณะประมวลผลคำขอของคุณ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ"
+        );
       }
     } finally {
-      // ...
+      setLoading(false);
     }
   };
 
@@ -234,12 +251,11 @@ function Form() {
     setModalIsOpen(false); // Close modal
   };
 
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
         {!formSubmitted ? (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} aria-label="แบบฟอร์มการพยากรณ์">
             <div className="space-y-12 ">
               <div className="border-b border-gray-900/10 pb-12">
                 <div className="mt-10 space-y-10">
@@ -251,45 +267,16 @@ function Form() {
                       <label className="block text-sm font-medium leading-6 text-gray-900">
                         เพศ *
                       </label>
-                      <div className="flex items-center gap-x-3">
-                        <label className="flex items-center gap-x-3">
-                          <input
-                            type="radio"
-                            name="gender"
-                            value="ชาย"
-                            checked={formData.gender === "ชาย"}
-                            onChange={handleChange}
-                            className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                          />
-                          ชาย
-                        </label>
-                      </div>
-                      <div className="flex items-center gap-x-3">
-                        <label className="flex items-center gap-x-3">
-                          <input
-                            type="radio"
-                            name="gender"
-                            value="หญิง"
-                            checked={formData.gender === "หญิง"}
-                            onChange={handleChange}
-                            className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                          />
-                          หญิง
-                        </label>
-                      </div>
-                      <div className="flex items-center gap-x-3">
-                        <label className="flex items-center gap-x-3">
-                          <input
-                            type="radio"
-                            name="gender"
-                            value="อื่นๆ"
-                            checked={formData.gender === "อื่นๆ"}
-                            onChange={handleChange}
-                            className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                          />
-                          อื่นๆ
-                        </label>
-                      </div>
+                      <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                      >
+                        <option value="">เลือกเพศ</option>
+                        <option value="ชาย">ชาย</option>
+                        <option value="หญิง">หญิง</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                      </select>
                     </div>
 
                     <div className="mt-6 space-y-6">
@@ -1187,12 +1174,18 @@ function Form() {
                       </div>
                     </div>
                   </fieldset>
+                  {/* แสดงข้อความข้อผิดพลาด */}
+                  {errorMessage && (
+                    <p style={{ color: "red" }}>{errorMessage}</p>
+                  )}
                   {!formSubmitted ? (
                     <button
                       type="submit"
+                      disabled={loading}
+                      aria-disabled={loading}
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                     >
-                      ส่งแบบสอบถาม
+                      {loading ? "กำลังส่ง..." : "ส่งแบบสอบถาม"}
                     </button>
                   ) : (
                     <button
@@ -1203,17 +1196,18 @@ function Form() {
                       พยากรณ์ใหม่
                     </button>
                   )}
+                  {loading && (
+                    <div className="flex items-center justify-center">
+                      <ClipLoader color="#3498db" loading={loading} size={50} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </form>
         ) : null}
       </div>
-      {loading && (
-        <div className="">
-          <ClipLoader color="#3498db" loading={loading} size={50} />
-        </div>
-      )}
+
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={handleNewPrediction}
@@ -1228,4 +1222,4 @@ function Form() {
   );
 }
 
-export default Form;
+export default memo(Form);
