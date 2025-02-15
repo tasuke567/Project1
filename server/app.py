@@ -43,10 +43,21 @@ class ModelComponents:
     categorical_features: List[str]
 
 try:
-    model_data = joblib.load(app.config['MODEL_PATH'])
-    print("✅ Model loaded from:", app.config['MODEL_PATH'])
+    model_path = os.path.join(os.path.dirname(__file__), 'model/best_decision_tree.joblib')
+    print(f"🔄 Attempting to load model from: {model_path}")
+    
+    if not os.path.exists(model_path):
+        print(f"❌ Model file not found at: {model_path}")
+        model_data = None
+    else:
+        print(f"✅ Model file exists, size: {os.path.getsize(model_path)} bytes")
+        model_data = joblib.load(model_path)
+        print(f"🔥 Model loaded successfully! Features: {len(model_data.feature_names)}")
+        
 except Exception as e:
-    print(f"❌ Failed to load model: {str(e)}")
+    print(f"💥 Critical load error: {str(e)}")
+    import traceback
+    traceback.print_exc()
     model_data = None
 
 class SmartphoneBrandPredictor:
