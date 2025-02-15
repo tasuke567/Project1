@@ -1,71 +1,314 @@
-from flask import Flask, request, jsonify, abort  # Include 'abort' in the import
+from flask import Flask, request, jsonify, abort
 import pandas as pd
 import joblib
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV, cross_val_score
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder, StandardScaler
-from imblearn.over_sampling import SMOTE
-from collections import Counter
-from sklearn.metrics import classification_report, accuracy_score
-import warnings
-import os
-from flask_cors import CORS
 import logging
 from werkzeug.utils import secure_filename
+import os
+import warnings
+from flask_cors import CORS
+import numpy as np
+
+from typing import Dict, Any, List
+import numpy as np
+import pandas as pd
+import logging
+
+from typing import Dict, List, Tuple, Any
+import numpy as np
+import pandas as pd
+from sklearn.base import BaseEstimator
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import classification_report, f1_score, confusion_matrix
+from imblearn.over_sampling import SMOTE
+import joblib
+import logging
+from dataclasses import dataclass
 
 warnings.filterwarnings('ignore')
-# Load the model and feature names
-model_data = joblib.load('./model/random_forest_model.joblib')
-model = model_data['model']
-feature_names = model_data['feature_names']
+
+@dataclass
+class ModelComponents:
+    model: Any
+    encoder: OneHotEncoder
+    scaler: StandardScaler
+    label_encoder: LabelEncoder
+    feature_names: List[str]
+    categorical_features: List[str]
+    
+class SmartphoneBrandPredictor:
+    def __init__(self, categorical_features: List[str], threshold: int = 2):
+        self.categorical_features = categorical_features
+        self.threshold = threshold
+        self.components = ModelComponents(
+            model=None,
+            encoder=OneHotEncoder(),
+            scaler=StandardScaler(),
+            label_encoder=LabelEncoder(),
+            feature_names=[],
+            categorical_features=self.categorical_features
+        )
+        
+    def preprocess_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Preprocess the input data with proper Thai language handling"""
+        # Create a copy to avoid modifying original data
+        df = data.copy()
+        
+        # Handle missing values with appropriate Thai placeholder
+        df.fillna('ไม่ระบุ', inplace=True)
+        
+        # Convert all categorical columns to string and clean
+        for col in self.categorical_features:
+            df[col] = df[col].astype(str).str.strip()
+            
+        return df
+    
+    def handle_rare_classes(self, df: pd.DataFrame, target_column: str) -> pd.DataFrame:
+        """Combine rare classes with proper handling of Thai characters"""
+        y_counts = df[target_column].value_counts()
+        df[target_column] = df[target_column].apply(
+            lambda x: 'อื่นๆ' if y_counts[x] < self.threshold else x
+        )
+        return df
+    
+    def prepare_features(self, 
+                        X_train: pd.DataFrame, 
+                        X_test: pd.DataFrame,
+                        y_train: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Prepare features with one-hot encoding and scaling"""
+        # Initialize encoders
+        encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+        scaler = StandardScaler()
+        
+        # One-hot encode categorical features
+        X_train_encoded = encoder.fit_transform(X_train[self.categorical_features])
+        X_test_encoded = encoder.transform(X_test[self.categorical_features])
+        
+        # Create DataFrames with encoded features
+        encoded_df_train = pd.DataFrame(
+            X_train_encoded,
+            columns=encoder.get_feature_names_out(self.categorical_features)
+        )
+        encoded_df_test = pd.DataFrame(
+            X_test_encoded,
+            columns=encoder.get_feature_names_out(self.categorical_features)
+        )
+        
+        # Scale features
+        X_train_scaled = scaler.fit_transform(encoded_df_train)
+        X_test_scaled = scaler.transform(encoded_df_test)
+        
+        # Update components with actual values
+        self.components.encoder = encoder
+        self.components.scaler = scaler
+        self.components.feature_names = encoder.get_feature_names_out(self.categorical_features)
+        
+        return X_train_scaled, X_test_scaled
+    
+    def apply_smote(self, 
+                    X_train: np.ndarray, 
+                    y_train: np.ndarray,
+                    min_samples: int = 5) -> Tuple[np.ndarray, np.ndarray]:
+        """Apply SMOTE with proper handling of minority classes"""
+        # Identify valid classes for SMOTE
+        class_counts = pd.Series(y_train).value_counts()
+        valid_classes = class_counts[class_counts > min_samples].index
+        mask = np.isin(y_train, valid_classes)
+        
+        # Apply SMOTE only to valid classes
+        smote = SMOTE(
+            sampling_strategy='not majority',
+            random_state=42,
+            k_neighbors=2
+        )
+        X_res, y_res = smote.fit_resample(X_train[mask], y_train[mask])
+        
+        # Combine with original minority samples
+        X_final = np.vstack([X_res, X_train[~mask]])
+        y_final = np.concatenate([y_res, y_train[~mask]])
+        
+        return X_final, y_final
+    
+    def train(self, data: pd.DataFrame, target_column: str) -> Dict[str, Any]:
+        """Train the model with comprehensive logging and validation"""
+        try:
+            # Preprocess data
+            df = self.preprocess_data(data)
+            df = self.handle_rare_classes(df, target_column)
+            
+            # Prepare target variable
+            y_encoder = LabelEncoder()
+            y = y_encoder.fit_transform(df[target_column])
+            self.components.label_encoder = y_encoder
+            
+            # Split data
+            X = df.drop(target_column, axis=1)
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.4, random_state=42, stratify=y
+            )
+            
+            # Prepare features
+            X_train_scaled, X_test_scaled = self.prepare_features(X_train, X_test, y_train)
+            
+            # Apply SMOTE
+            X_train_resampled, y_train_resampled = self.apply_smote(X_train_scaled, y_train)
+            
+            # Train model with class weights
+            class_weights = {i: sum(y_train_resampled == i) for i in np.unique(y_train_resampled)}
+            model = DecisionTreeClassifier(
+                class_weight=class_weights,
+                random_state=42
+            )
+            
+            # Fit and evaluate
+            model.fit(X_train_resampled, y_train_resampled)
+            self.components.model = model
+            
+            # Calculate metrics
+            y_pred = model.predict(X_test_scaled)
+            report = classification_report(y_test, y_pred, 
+                                        target_names=y_encoder.classes_,
+                                        output_dict=True)
+            
+            # Save model components
+            os.makedirs('model', exist_ok=True)
+            joblib.dump(self.components, 'model/best_decision_tree.joblib')
+            
+            # After training
+            print("Actual features:", len(self.components.feature_names))
+            
+            return {
+                "success": True,
+                "metrics": {
+                    "classification_report": report,
+                    "f1_macro": f1_score(y_test, y_pred, average='macro'),
+                    "class_distribution": pd.Series(y_encoder.inverse_transform(y)).value_counts().to_dict()
+                }
+            }
+            
+        except Exception as e:
+            logging.error(f"Error during model training: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+if __name__ == "__main__":
+    categorical_features = [
+        'เพศ', 'ช่วงอายุ', 'สถานภาพ', 'ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?',
+        'กิจกรรมที่ใช้สมาร์ทโฟนมากที่สุด 3 อันดับ', 'ท่านใช้สมาร์ทโฟนนานเท่าใดในหนึ่งวัน',
+        'สมาร์ทโฟนสำคัญในชีวิตประจำวันอย่างไร', 'ปัจจัยที่พิจารณาเมื่อซื้อสมาร์ทโฟนออนไลน์มากที่สุด',
+        'ความพึงพอใจจากยี่ห้อสมาร์ทโฟนที่ใช้ในปัจจุบัน', 'ปัญหาในการซื้อสมาร์ทโฟนออนไลน์',
+        'รายได้ต่อเดือน', 'อาชีพ'
+    ]
+    
+    predictor = SmartphoneBrandPredictor(categorical_features)
+    data = pd.read_csv("./datasets/dataset2.csv")
+    results = predictor.train(data, 'ยี่ห้อสมาร์ทโฟนที่ใช้งานในปัจจุบัน')   
+
+    # After predictor initialization
+    print("Components initialized:", hasattr(predictor.components, 'label_encoder'))  # Should be True
+
+    # Load the model components correctly
+    model_data = joblib.load('model/best_decision_tree.joblib')
+    model = model_data.model
+    encoder = model_data.encoder
+    scaler = model_data.scaler
+    y_encoder = model_data.label_encoder
+    categorical_features = model_data.categorical_features
+    feature_names = model_data.feature_names
+
+    print("Feature count:", len(feature_names))
+    print("Encoder matches features:", np.array_equal(encoder.get_feature_names_out(categorical_features), feature_names))
+
+    print("Training features:", feature_names[:5])
+    print("Encoder features:", encoder.get_feature_names_out(categorical_features)[:5])
+
+    # After loading model_data
+    print("Actual features:", len(predictor.components.feature_names))
+    print("Saved features:", len(model_data.feature_names))  # Now valid here
+
+# Create Flask app
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['DATASETS_FOLDER'] = './datasets'
+app.config['MODEL_PATH'] = './best_decision_tree.joblib'
 CORS(app)
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
+# Allowed file extensions for CSV upload
+ALLOWED_EXTENSIONS = {'csv'}
+
+# Function to check allowed file extension
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        logging.info("Received a prediction request")
-        data = request.get_json(force=True)
-
-        # ตรวจสอบว่ามี feature_names ใน model_data หรือไม่
-        if 'feature_names' in model_data:
-            feature_names = model_data['feature_names']
-        else:
-            raise KeyError("'feature_names' key not found in model data")
-
-        # ตรวจสอบว่า data เป็น dict หรือไม่
-        if isinstance(data, dict):
-            data = [data]
-
-        df = pd.DataFrame(data)
-
-        # ตรวจสอบให้แน่ใจว่าฟีเจอร์ที่จำเป็นมีอยู่
-        for col in feature_names:
-            if col not in df.columns:
-                df[col] = 0  # เพิ่มคอลัมน์ใหม่ด้วยค่า 0 ถ้าขาด
-
-        # จัดเรียงคอลัมน์ให้ตรงตามชื่อฟีเจอร์ที่ใช้ในการฝึก
-        df = df.reindex(columns=feature_names, fill_value=0)
-
-        # ตรวจสอบจำนวนฟีเจอร์
-        if df.shape[1] != len(feature_names):
-            raise ValueError(f"Input data has {df.shape[1]} features, but the model expects {len(feature_names)} features.")
-
-        # คาดการณ์ผลลัพธ์
-        prediction = model.predict(df)
-
-        logging.info(f"Prediction result: {prediction.tolist()}")
+        # Get input data
+        data = request.get_json()
+        app.logger.debug(f"Received data: {data}")
         
-        return jsonify({'prediction': prediction.tolist()})
-
+        # Create DataFrame from input
+        input_df = pd.DataFrame([data])
+        
+        # 1. Preprocess categorical features
+        for col in categorical_features:
+            # Convert to string and handle missing values
+            input_df[col] = input_df[col].astype(str).fillna('ไม่ระบุ').str.strip()
+            
+        # 2. One-hot encoding (critical fix)
+        encoded_data = encoder.transform(input_df[categorical_features])
+        
+        # 3. Strict column alignment
+        # Create DataFrame with EXACTLY the same columns as training data
+        encoded_df = pd.DataFrame(
+            encoded_data,
+            columns=encoder.get_feature_names_out(categorical_features)
+        )
+        encoded_df = encoded_df.reindex(columns=feature_names, fill_value=0)
+        
+        # 4. Force numeric conversion
+        encoded_df = encoded_df.astype(np.float64)
+        
+        # 5. Debug logs for verification
+        app.logger.debug(f"Feature count: {len(encoded_df.columns)}")
+        app.logger.debug(f"Expected features: {len(feature_names)}")
+        app.logger.debug(f"First 5 features: {encoded_df.columns.tolist()[:5]}")
+        
+        # 6. Feature scaling
+        scaled_data = scaler.transform(encoded_df)
+        
+        # Make prediction
+        prediction = model.predict(scaled_data)
+        predicted_brand = y_encoder.inverse_transform(prediction)
+        
+        return jsonify({
+            "predicted_brand": predicted_brand[0],
+            "confidence": float(np.max(model.predict_proba(scaled_data)))
+        })
+        
     except Exception as e:
-        logging.error(f"Error during prediction: {e}")
-        return jsonify({'error': str(e)}), 500
+        app.logger.error(f"Prediction error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/model_info', methods=['GET'])
+def get_model_info():
+    """Get information about the trained model"""
+    return jsonify({
+        "features": feature_names.tolist(),
+        "classes": y_encoder.classes_.tolist(),
+        "categorical_features": categorical_features
+    })
+
+if __name__ == '__main__':
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 
 def allowed_dataset_file(filename):
@@ -293,6 +536,57 @@ def update_model(filename):
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'pkl'}
+
+
+def safe_preprocess_input(data: Dict[str, Any], 
+                         categorical_features: List[str],
+                         encoder: Any,
+                         scaler: Any,
+                         feature_names: List[str]) -> np.ndarray:
+    """
+    Safely preprocess input data with proper type handling and validation
+    """
+    try:
+        # Create DataFrame with explicit type conversion
+        input_data = pd.DataFrame([data])
+        
+        # Safely convert categorical features
+        for col in categorical_features:
+            if col in input_data.columns:
+                # Handle missing values before conversion
+                input_data[col] = input_data[col].fillna('Unknown')
+                # Safe category conversion with error handling
+                try:
+                    input_data[col] = input_data[col].astype('category').cat.codes + 1
+                except (TypeError, ValueError) as e:
+                    logging.warning(f"Error converting column {col}: {e}")
+                    input_data[col] = 0  # Fallback value
+        
+        # One-hot encoding with validation
+        encoded_data = encoder.transform(input_data[categorical_features])
+        encoded_df = pd.DataFrame(
+            encoded_data,
+            columns=encoder.get_feature_names_out()
+        )
+        
+        # Ensure all feature columns exist
+        encoded_df = encoded_df.reindex(columns=feature_names, fill_value=0)
+        
+        # Safe numeric conversion
+        for col in encoded_df.columns:
+            encoded_df[col] = pd.to_numeric(encoded_df[col], errors='coerce').fillna(0)
+        
+        # Ensure all data is float64
+        encoded_df = encoded_df.astype(np.float64)
+        
+        # Scale features
+        scaled_data = scaler.transform(encoded_df)
+        
+        return scaled_data
+        
+    except Exception as e:
+        logging.error(f"Preprocessing error: {str(e)}")
+        raise ValueError(f"Error during preprocessing: {str(e)}")
 
 if __name__ == '__main__':
     app.config['UPLOAD_FOLDER'] = 'uploads'
