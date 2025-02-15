@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, List
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, LabelEncoder
 import pandas as pd
+from flask_cors import CORS
 
 @dataclass
 class ModelComponents:
@@ -15,6 +16,7 @@ class ModelComponents:
     categorical_features: List[str]
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for all routes
 
 try:
     model_data = joblib.load('model/best_decision_tree.joblib')
