@@ -1,1 +1,1 @@
-from .model import ModelComponents 
+from .model_components import ModelComponents 
