@@ -8,6 +8,7 @@ from flask_cors import CORS
 
 @dataclass
 class ModelComponents:
+    __module__ = "server.app"
     model: Any
     encoder: OneHotEncoder
     scaler: StandardScaler
