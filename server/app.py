@@ -51,7 +51,7 @@ class SmartphoneBrandPredictor:
             categorical_features=self.categorical_features
         )
         
-    def preprocess_data(self, data: pd.DataFrame) -> pd.DataFrame:
+    def preprocess_data(self, data: pd.DataFrame, is_training: bool = True) -> pd.DataFrame:
         """Preprocess the input data with proper Thai language handling"""
         # Create a copy to avoid modifying original data
         df = data.copy()
@@ -63,6 +63,12 @@ class SmartphoneBrandPredictor:
         for col in self.categorical_features:
             df[col] = df[col].astype(str).str.strip()
             
+        if is_training:
+            self.components.encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+            encoded_features = self.components.encoder.fit_transform(df[self.categorical_features])
+        else:
+            encoded_features = self.components.encoder.transform(df[self.categorical_features])
+        
         return df
     
     def handle_rare_classes(self, df: pd.DataFrame, target_column: str) -> pd.DataFrame:
@@ -195,6 +201,30 @@ class SmartphoneBrandPredictor:
                 "error": str(e)
             }
 
+    def predict(self, input_data: dict) -> dict:
+        try:
+            # Convert input data to DataFrame
+            input_df = pd.DataFrame([input_data])
+            
+            # Preprocess the input data
+            processed_data = self.preprocess_data(input_df, is_training=False)
+            
+            # Make prediction
+            prediction = self.components.model.predict(processed_data)
+            
+            # Inverse transform the prediction
+            predicted_brand = self.components.label_encoder.inverse_transform(prediction)
+            
+            return {
+                "prediction": predicted_brand[0],
+                "success": True
+            }
+        except Exception as e:
+            return {
+                "error": str(e),
+                "success": False
+            }
+
 if __name__ == "__main__":
     categorical_features = [
         'เพศ', 'ช่วงอายุ', 'สถานภาพ', 'ท่านใช้แอปพลิเคชันใดบ้างเป็นประจำ?',
@@ -247,63 +277,37 @@ ALLOWED_EXTENSIONS = {'csv'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Load model components at startup
+model_data = joblib.load('model/best_decision_tree.joblib')
+
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
         # Get input data
-        data = request.get_json()
-        app.logger.debug(f"Received data: {data}")
+        input_data = request.get_json()
         
-        # Create DataFrame from input
-        input_df = pd.DataFrame([data])
+        # Convert to DataFrame
+        input_df = pd.DataFrame([input_data])
         
-        # 1. Preprocess categorical features
-        for col in categorical_features:
-            # Convert to string and handle missing values
-            input_df[col] = input_df[col].astype(str).fillna('ไม่ระบุ').str.strip()
-            
-        # 2. One-hot encoding (critical fix)
-        encoded_data = encoder.transform(input_df[categorical_features])
-        
-        # 3. Strict column alignment
-        # Create DataFrame with EXACTLY the same columns as training data
-        encoded_df = pd.DataFrame(
-            encoded_data,
-            columns=encoder.get_feature_names_out(categorical_features)
-        )
-        encoded_df = encoded_df.reindex(columns=feature_names, fill_value=0)
-        
-        # 4. Force numeric conversion
-        encoded_df = encoded_df.astype(np.float64)
-        
-        # 5. Debug logs for verification
-        app.logger.debug(f"Feature count: {len(encoded_df.columns)}")
-        app.logger.debug(f"Expected features: {len(feature_names)}")
-        app.logger.debug(f"First 5 features: {encoded_df.columns.tolist()[:5]}")
-        
-        # 6. Feature scaling
-        scaled_data = scaler.transform(encoded_df)
+        # Preprocess using existing components
+        processed_data = model_data.encoder.transform(input_df[model_data.categorical_features])
+        scaled_data = model_data.scaler.transform(processed_data)
         
         # Make prediction
-        prediction = model.predict(scaled_data)
-        predicted_brand = y_encoder.inverse_transform(prediction)
+        prediction = model_data.model.predict(scaled_data)
+        predicted_brand = model_data.label_encoder.inverse_transform(prediction)
         
-        return jsonify({
-            "predicted_brand": predicted_brand[0],
-            "confidence": float(np.max(model.predict_proba(scaled_data)))
-        })
-        
+        return jsonify({"prediction": predicted_brand[0], "success": True})
     except Exception as e:
-        app.logger.error(f"Prediction error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e), "success": False}), 500
 
 @app.route('/model_info', methods=['GET'])
 def get_model_info():
     """Get information about the trained model"""
     return jsonify({
-        "features": feature_names.tolist(),
-        "classes": y_encoder.classes_.tolist(),
-        "categorical_features": categorical_features
+        "features": model_data.feature_names.tolist(),
+        "classes": model_data.label_encoder.classes_.tolist(),
+        "categorical_features": model_data.categorical_features
     })
 
 if __name__ == '__main__':
