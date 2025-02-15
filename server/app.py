@@ -1,30 +1,19 @@
 from flask import Flask, request, jsonify
 import joblib
-from dataclasses import dataclass
-from typing import Any, List
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, LabelEncoder
+import os
 import pandas as pd
 from flask_cors import CORS
-
-@dataclass
-class ModelComponents:
-    __module__ = "server.app"
-    model: Any
-    encoder: OneHotEncoder
-    scaler: StandardScaler
-    label_encoder: LabelEncoder
-    feature_names: List[str]
-    categorical_features: List[str]
+from .model import ModelComponents  # 👈 Import from module
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins for all routes
+CORS(app)
 
 try:
-    model_data = joblib.load('model/best_decision_tree.joblib')
-    print("✅ Model components loaded successfully!")
-    print(f"🔢 Feature count: {len(model_data.feature_names)}")
+    model_path = os.path.join(os.path.dirname(__file__), 'model/best_decision_tree.joblib')
+    model_data = joblib.load(model_path)
+    print("✅ Model loaded successfully!")
 except Exception as e:
-    print(f"❌ Error loading model: {str(e)}")
+    print(f"❌ Model load failed: {str(e)}")
     model_data = None
 
 @app.route('/predict', methods=['POST'])
