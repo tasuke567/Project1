@@ -1,4 +1,7 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import joblib
+import os
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
@@ -10,6 +13,21 @@ from model import ModelComponents  # Adjust the import path to where it's define
 
 
 app = Flask(__name__)
+
+# Configure CORS
+CORS(app, resources={
+    r"/predict": {"origins": "*"},
+    r"/upload_dataset": {"origins": "*"},
+    r"/tune_model": {"origins": "*"}
+})
+
+# Add CORS headers to all responses
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 # Load the model and other components
 def load_model():
