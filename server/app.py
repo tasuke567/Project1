@@ -15,6 +15,12 @@ CORS(app)
 
 try:
     model_path = os.path.join(os.path.dirname(__file__), 'model/best_decision_tree.joblib')
+    if os.path.exists(model_path):
+        model_data = joblib.load(model_path)
+        print(f"✅ Model loaded successfully from {model_path}")
+    else:
+        print(f"❌ Model file not found at {model_path}")
+    model_data = None
     model_data = joblib.load(model_path)
     print(f"✅ Model loaded successfully from {model_path}")
 except Exception as e:
