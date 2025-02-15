@@ -3,12 +3,7 @@ from flask_cors import CORS
 import joblib
 import os
 import pandas as pd
-try:
-    # Production import
-    from server.model import ModelComponents
-except ImportError:
-    # Local development import
-    from .model import ModelComponents  # noqa: F401
+from model import ModelComponents  # Direct import now
 
 app = Flask(__name__)
 CORS(app)
