@@ -1,1 +1,1 @@
-from ..model_components import ModelComponents 
+from ..project1.model_components import ModelComponents 
