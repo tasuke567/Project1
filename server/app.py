@@ -9,6 +9,9 @@ from sklearn.metrics import classification_report, f1_score
 import numpy as np
 import sys
 sys.path.append('/opt/render/project/src') 
+print(sys.path)
+import os
+print(os.listdir('/opt/render/project/src'))
 
 
 class ModelComponents:
