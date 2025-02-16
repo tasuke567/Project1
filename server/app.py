@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+
 import joblib
+from server.model.model_components import ModelComponents
+
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
@@ -12,16 +15,6 @@ sys.path.append('/opt/render/project/src')
 print(sys.path)
 import os
 print(os.listdir('/opt/render/project/src'))
-
-
-class ModelComponents:
-    def __init__(self, model, encoder, scaler, label_encoder, feature_names, categorical_features):
-        self.model = model
-        self.encoder = encoder
-        self.scaler = scaler
-        self.label_encoder = label_encoder
-        self.feature_names = feature_names
-        self.categorical_features = categorical_features
 
 
 app = Flask(__name__)
@@ -41,7 +34,7 @@ def add_cors_headers(response):
 def load_model():
     try:
         print("🔍 Attempting to load model...")
-        model_data = joblib.load('./model/best_decision_tree.joblib')
+        model_data = joblib.load('/opt/render/project/src/server/model/best_decision_tree.joblib')
         print(type(model_data)) 
         print("✅ Model loaded successfully")
         
