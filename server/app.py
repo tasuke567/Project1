@@ -16,9 +16,9 @@ class ModelComponents:
 
 # Load model components
 import pickle
-
+from model.model_components import ModelComponents
 with open("./model/best_decision_tree.pkl", "rb") as f:
-    model_components = pickle.load(f)
+    model_components = pickle.load(f, fix_imports=True)
 
 model = model_components.model
 encoder = model_components.encoder
