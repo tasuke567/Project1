@@ -15,7 +15,11 @@ class ModelComponents:
         self.categorical_features = categorical_features
 
 # Load model components
-model_components = joblib.load("./model/best_decision_tree.joblib")
+import pickle
+
+with open("./model/best_decision_tree.pkl", "rb") as f:
+    model_components = pickle.load(f)
+
 model = model_components.model
 encoder = model_components.encoder
 scaler = model_components.scaler
