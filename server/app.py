@@ -1,26 +1,28 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from model.model_components import ModelComponents  # Adjust the import path to where it's defined
 import joblib
-import os
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, f1_score
-from flask import Flask, request, jsonify
 import numpy as np
 
+
+class ModelComponents:
+    def __init__(self, model, encoder, scaler, label_encoder, feature_names, categorical_features):
+        self.model = model
+        self.encoder = encoder
+        self.scaler = scaler
+        self.label_encoder = label_encoder
+        self.feature_names = feature_names
+        self.categorical_features = categorical_features
 
 
 app = Flask(__name__)
 
 # Configure CORS
-CORS(app, resources={
-    r"/predict": {"origins": "*"},
-    r"/upload_dataset": {"origins": "*"},
-    r"/tune_model": {"origins": "*"}
-})
+CORS(app, resources={r"/predict": {"origins": "*"}, r"/upload_dataset": {"origins": "*"}, r"/tune_model": {"origins": "*"}})
 
 # Add CORS headers to all responses
 @app.after_request
@@ -36,18 +38,18 @@ def load_model():
         model_data = joblib.load('best_decision_tree.joblib')
         print(type(model_data)) 
         print("✅ Model loaded successfully")
-        # ตรวจสอบว่า model_components เป็น instance ของ ModelComponents
+        
         if not isinstance(model_data, ModelComponents):
             raise TypeError("❌ The loaded model is not a valid ModelComponents object!")
-        # Assuming model_data is a ModelComponents object
-        model = model_data.model  # Access the trained model
-        encoder = model_data.encoder  # Access the encoder
-        scaler = model_data.scaler  # Access the scaler
-        label_encoder = model_data.label_encoder  # Access the label encoder
-        feature_names = model_data.feature_names  # Access feature names
-        categorical_features = model_data.categorical_features  # Access categorical features
+        
+        model = model_data.model
+        encoder = model_data.encoder
+        scaler = model_data.scaler
+        label_encoder = model_data.label_encoder
+        feature_names = model_data.feature_names
+        categorical_features = model_data.categorical_features
 
-        return model_data  # Return the ModelComponents object
+        return ModelComponents(model, encoder, scaler, label_encoder, feature_names, categorical_features)
 
     except Exception as e:
         print(f"❌ Model load failed: {str(e)}")
@@ -63,7 +65,6 @@ def predict():
         return jsonify({"error": "Model not loaded", "success": False}), 500
     
     try:
-        # Get input data from the request
         data = request.get_json()
         input_df = pd.DataFrame([data])  # Convert input data to DataFrame
 
@@ -104,5 +105,4 @@ def predict():
         }), 400
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
