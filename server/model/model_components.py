@@ -1,3 +1,4 @@
+# model_components.py
 class ModelComponents:
     def __init__(self, model, encoder, scaler, label_encoder, feature_names, categorical_features):
         self.model = model

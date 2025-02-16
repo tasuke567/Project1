@@ -4,17 +4,9 @@ import joblib
 import numpy as np
 from fastapi.middleware.cors import CORSMiddleware
 import pickle
-from model.model_components import ModelComponents
+from model.model_components import ModelComponents 
 
-# Define ModelComponents class BEFORE loading joblib
-class ModelComponents:
-    def __init__(self, model, encoder, scaler, label_encoder, feature_names, categorical_features):
-        self.model = model
-        self.encoder = encoder
-        self.scaler = scaler
-        self.label_encoder = label_encoder
-        self.feature_names = feature_names
-        self.categorical_features = categorical_features
+
 
 # Load model components at the start of the app
 try:
