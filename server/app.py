@@ -15,16 +15,9 @@ class ModelComponents:
         self.categorical_features = categorical_features
 
 # Load model components
-import pickle
-from model.model_components import ModelComponents
-with open("./model/best_decision_tree.pkl", "rb") as f:
-    model_components = pickle.load(f, fix_imports=True)
 
-model = model_components.model
-encoder = model_components.encoder
-scaler = model_components.scaler
-label_encoder = model_components.label_encoder
-categorical_features = model_components.categorical_features
+
+
 
 app = FastAPI()
 
@@ -59,4 +52,14 @@ def predict(data: SmartphoneFeatures):
 
 if __name__ == "__main__":
     import uvicorn
+    import pickle
+    from model.model_components import ModelComponents
+    with open("./model/best_decision_tree.pkl", "rb") as f:
+        model_components = pickle.load(f, fix_imports=True)
+        
+    model = model_components.model
+    encoder = model_components.encoder
+    scaler = model_components.scaler
+    label_encoder = model_components.label_encoder
+    categorical_features = model_components.categorical_features
     uvicorn.run(app, host="0.0.0.0", port=8000)
