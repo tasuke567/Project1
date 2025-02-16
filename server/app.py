@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 import joblib
-from server.model.model_components import ModelComponents
+from model.model_components import ModelComponents
+
 
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
