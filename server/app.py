@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pickle
 from fastapi.middleware.cors import CORSMiddleware
-from model.model_components import ModelComponents  # Import ModelComponents here
+from server.model_components import ModelComponents  # Import ModelComponents here
 
 # Define the global model components variable
 model_components = None
