@@ -7,6 +7,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, f1_score
 import numpy as np
+import sys
+sys.path.append('/opt/render/project/src') 
 
 
 class ModelComponents:
