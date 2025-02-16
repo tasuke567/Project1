@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from model import ModelComponents  # Adjust the import path to where it's defined
 import joblib
 import os
 import pandas as pd
@@ -9,7 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, f1_score
 from flask import Flask, request, jsonify
 import numpy as np
-from model import ModelComponents  # Adjust the import path to where it's defined
+
 
 
 app = Flask(__name__)
@@ -34,7 +35,9 @@ def load_model():
     try:
         model_data = joblib.load('best_decision_tree.joblib')
         print("✅ Model loaded successfully")
-
+        # ตรวจสอบว่า model_components เป็น instance ของ ModelComponents
+        if not isinstance(model_data, ModelComponents):
+            raise TypeError("❌ The loaded model is not a valid ModelComponents object!")
         # Assuming model_data is a ModelComponents object
         model = model_data.model  # Access the trained model
         encoder = model_data.encoder  # Access the encoder
