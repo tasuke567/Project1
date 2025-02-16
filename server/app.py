@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 
 warnings.filterwarnings('ignore')
 # Load the model and feature names
-model_data = joblib.load('./model/random_forest_model.joblib')
+model_data = joblib.load('./model/best_decision_tree_with_features.joblib')
 model = model_data['model']
 feature_names = model_data['feature_names']
 app = Flask(__name__)
