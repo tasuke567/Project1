@@ -31,24 +31,7 @@ app.add_middleware(
 )
 
 # Define request model
-class SmartphoneFeatures(BaseModel):
-    features: dict
 
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
-
-@app.post("/predict")
-def predict(data: SmartphoneFeatures):
-    try:
-        input_data = [data.features.get(col, "Unknown") for col in categorical_features]
-        encoded_input = encoder.transform([input_data])
-        scaled_input = scaler.transform(encoded_input)
-        prediction = model.predict(scaled_input)
-        predicted_label = label_encoder.inverse_transform(prediction)[0]
-        return {"predicted_brand": predicted_label}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
@@ -62,4 +45,24 @@ if __name__ == "__main__":
     scaler = model_components.scaler
     label_encoder = model_components.label_encoder
     categorical_features = model_components.categorical_features
+    
+    
+    class SmartphoneFeatures(BaseModel):
+        features: dict
+
+    @app.get("/health")
+    def health_check():
+        return {"status": "ok"}
+    
+    @app.post("/predict")
+    def predict(data: SmartphoneFeatures):
+        try:
+            input_data = [data.features.get(col, "Unknown") for col in categorical_features]
+            encoded_input = encoder.transform([input_data])
+            scaled_input = scaler.transform(encoded_input)
+            prediction = model.predict(scaled_input)
+            predicted_label = label_encoder.inverse_transform(prediction)[0]
+            return {"predicted_brand": predicted_label}
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
     uvicorn.run(app, host="0.0.0.0", port=8000)
