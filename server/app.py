@@ -40,7 +40,8 @@ def add_cors_headers(response):
 # Load the model and other components
 def load_model():
     try:
-        model_data = joblib.load('best_decision_tree.joblib')
+        print("🔍 Attempting to load model...")
+        model_data = joblib.load('./model/best_decision_tree.joblib')
         print(type(model_data)) 
         print("✅ Model loaded successfully")
         
