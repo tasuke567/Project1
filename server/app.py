@@ -12,10 +12,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, f1_score
 import numpy as np
 import sys
-sys.path.append('/opt/render/project/src') 
+sys.path.append('/opt/render/project/src/server') 
 print(sys.path)
 import os
-print(os.listdir('/opt/render/project/src'))
+print(os.listdir('/opt/render/project/src/server'))
 
 
 app = Flask(__name__)
