@@ -1,31 +1,33 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import joblib
-import numpy as np
-from fastapi.middleware.cors import CORSMiddleware
 import pickle
-from model.model_components import ModelComponents 
+from fastapi.middleware.cors import CORSMiddleware
+from model.model_components import ModelComponents  # Import ModelComponents here
 
+# Define the global model components variable
+model_components = None
 
+def load_model():
+    global model_components
+    try:
+        with open("./model/best_decision_tree.pkl", "rb") as f:
+            model_components = pickle.load(f, fix_imports=True)
 
-# Load model components at the start of the app
-try:
-    with open("./model/best_decision_tree.pkl", "rb") as f:
-        model_components = pickle.load(f, fix_imports=True)
+        model = model_components.model
+        encoder = model_components.encoder
+        scaler = model_components.scaler
+        label_encoder = model_components.label_encoder
+        categorical_features = model_components.categorical_features
 
-    model = model_components.model
-    encoder = model_components.encoder
-    scaler = model_components.scaler
-    label_encoder = model_components.label_encoder
-    categorical_features = model_components.categorical_features
+        # Ensure all components are loaded correctly
+        if not all([model, encoder, scaler, label_encoder]):
+            raise ValueError("One or more model components failed to load.")
+    except Exception as e:
+        model_components = None
+        print(f"Error loading model components: {str(e)}")
 
-    # Check if the model is loaded successfully
-    if not all([model, encoder, scaler, label_encoder]):
-        raise ValueError("One or more model components failed to load.")
-
-except Exception as e:
-    model = encoder = scaler = label_encoder = categorical_features = None
-    print(f"Error loading model components: {str(e)}")
+# Call load_model before the FastAPI app starts
+load_model()
 
 # Create FastAPI app
 app = FastAPI()
@@ -45,21 +47,22 @@ class SmartphoneFeatures(BaseModel):
 
 @app.get("/health")
 def health_check():
-    if model:
+    if model_components:
         return {"status": "ok"}
     return {"status": "error", "message": "Model not loaded"}
 
 @app.post("/predict")
 def predict(data: SmartphoneFeatures):
-    if not model:
+    if not model_components:
         raise HTTPException(status_code=500, detail="Model not loaded")
     
     try:
-        input_data = [data.features.get(col, "Unknown") for col in categorical_features]
-        encoded_input = encoder.transform([input_data])
-        scaled_input = scaler.transform(encoded_input)
-        prediction = model.predict(scaled_input)
-        predicted_label = label_encoder.inverse_transform(prediction)[0]
+        # Access components from the global model_components variable
+        input_data = [data.features.get(col, "Unknown") for col in model_components.categorical_features]
+        encoded_input = model_components.encoder.transform([input_data])
+        scaled_input = model_components.scaler.transform(encoded_input)
+        prediction = model_components.model.predict(scaled_input)
+        predicted_label = model_components.label_encoder.inverse_transform(prediction)[0]
         return {"predicted_brand": predicted_label}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
