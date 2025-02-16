@@ -6,3 +6,6 @@ numpy
 joblib
 flask_cors
 imbalanced-learn
+fastapi
+uvicorn
+scikit-learn
