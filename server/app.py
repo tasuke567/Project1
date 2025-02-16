@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from model import ModelComponents  # Adjust the import path to where it's defined
+from model.model_components import ModelComponents  # Adjust the import path to where it's defined
 import joblib
 import os
 import pandas as pd
@@ -34,6 +34,7 @@ def add_cors_headers(response):
 def load_model():
     try:
         model_data = joblib.load('best_decision_tree.joblib')
+        print(type(model_data)) 
         print("✅ Model loaded successfully")
         # ตรวจสอบว่า model_components เป็น instance ของ ModelComponents
         if not isinstance(model_data, ModelComponents):
@@ -45,8 +46,6 @@ def load_model():
         label_encoder = model_data.label_encoder  # Access the label encoder
         feature_names = model_data.feature_names  # Access feature names
         categorical_features = model_data.categorical_features  # Access categorical features
-        print(model_data)  # Check what it returns
-        print(type(model_data))  # Check the type
 
         return model_data  # Return the ModelComponents object
 
