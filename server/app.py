@@ -1,31 +1,30 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from joblib import load
 import pickle
+from multiprocessing import Manager
 from fastapi.middleware.cors import CORSMiddleware
 from model_components import ModelComponents  # Import ModelComponents here
 
 # Define the global model components variable
 model_components = None
 
+manager = Manager()
+model_components = manager.dict()
+
 def load_model():
-    global model_components
     try:
         with open("./model/best_decision_tree.pkl", "rb") as f:
-            model_components = pickle.load(f, fix_imports=True)
-
-        model = model_components.model
-        encoder = model_components.encoder
-        scaler = model_components.scaler
-        label_encoder = model_components.label_encoder
-        categorical_features = model_components.categorical_features
-
-        # Ensure all components are loaded correctly
-        if not all([model, encoder, scaler, label_encoder]):
-            raise ValueError("One or more model components failed to load.")
+            model = pickle.load(f, fix_imports=True)
+            model_components["model"] = model.model
+            model_components["encoder"] = model.encoder
+            model_components["scaler"] = model.scaler
+            model_components["label_encoder"] = model.label_encoder
+            model_components["categorical_features"] = model.categorical_features
     except Exception as e:
-        model_components = None
         print(f"Error loading model components: {str(e)}")
-
+        model_components.clear()
+        
 # Call load_model before the FastAPI app starts
 load_model()
 
