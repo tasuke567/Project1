@@ -16,7 +16,7 @@ const SmartphonePrediction = ({ prediction, handleNewPrediction }) => {
     },
     2: {
       name: "Apple",
-      description: "สมาร์ทโฟนจากจีนที่มาพร้อมกับเทคโนโลยีล้ำสมัย",
+      description: "ผู้นำเทคโนโลยีและดีไซน์ล้ำสมัย",
       image: "/images/apple.png",
     },
     3: {
