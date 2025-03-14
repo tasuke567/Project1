@@ -7,19 +7,19 @@ import styles from "./style/Loading.module.css";
 const API_URL = import.meta.env.VITE_API_URL;
 function Form() {
   const [formData, setFormData] = useState({
-    gender: "",
-    ageRange: "",
-    maritalStatus: "",
-    occupation: "",
-    income: "",
-    apps: [],
-    activities: [],
-    dailyUsage: "",
-    importance: "",
-    purchaseFactors: "",
-    satisfaction: "",
-    onlinePurchaseIssues: "",
-    currentBrand: "",
+    gender: "ชาย", // ค่าเริ่มต้น
+    ageRange: "18-25 ปี",
+    maritalStatus: "โสด",
+    occupation: "นักเรียน / นักศึกษา",
+    income: "น้อยกว่า 15,000 บาท",
+    apps: ["Facebook", "YouTube", "Instagram"], // ค่าเริ่มต้นเลือกแอป
+    activities: ["โซเชียลมีเดีย", "ดูหนัง / ฟังเพลง", "เล่นเกม"],
+    dailyUsage: "1 - 3 ชั่วโมง",
+    importance: "จำเป็น",
+    purchaseFactors: "ราคา",
+    satisfaction: "3",
+    onlinePurchaseIssues: "ไม่สามารถสัมผัสหรือลองสินค้าได้จริง",
+    currentBrand: "Apple",
   });
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -252,8 +252,8 @@ function Form() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
+    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+      <div className="p-6 max-w-sm mx-auto bg-white rounded shadow-lg">
         {!formSubmitted ? (
           <form onSubmit={handleSubmit} aria-label="แบบฟอร์มการพยากรณ์">
             <div className="space-y-12 ">
@@ -264,10 +264,14 @@ function Form() {
                       แบบสอบถามเกี่ยวกับสมาร์ทโฟน
                     </legend>
                     <div className="mt-6 space-y-6">
-                      <label className="block text-sm font-medium leading-6 text-gray-900">
+                      <label
+                        className="block text-sm font-medium leading-6 text-gray-900"
+                        htmlFor="gender"
+                      >
                         เพศ *
                       </label>
                       <select
+                        id="gender"
                         name="gender"
                         value={formData.gender}
                         onChange={handleChange}
@@ -1211,7 +1215,7 @@ function Form() {
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={handleNewPrediction}
-        className="flex items-center justify-center fixed inset-0 bg-gray-800 bg-opacity-75"
+        
       >
         <SmartphonePrediction
           prediction={prediction}

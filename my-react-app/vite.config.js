@@ -10,6 +10,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "happy-dom",
-    setupFiles: "./src/Form.test.jsx",
+    setupFiles: "./vitest.setup.js",
   },
 });
