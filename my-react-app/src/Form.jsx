@@ -7,19 +7,19 @@ import styles from "./style/Loading.module.css";
 const API_URL = import.meta.env.VITE_API_URL;
 function Form() {
   const [formData, setFormData] = useState({
-    gender: "ชาย", // ค่าเริ่มต้น
-    ageRange: "18-25 ปี",
-    maritalStatus: "โสด",
-    occupation: "นักเรียน / นักศึกษา",
-    income: "น้อยกว่า 15,000 บาท",
-    apps: ["Facebook", "YouTube", "Instagram"], // ค่าเริ่มต้นเลือกแอป
-    activities: ["โซเชียลมีเดีย", "ดูหนัง / ฟังเพลง", "เล่นเกม"],
-    dailyUsage: "1 - 3 ชั่วโมง",
-    importance: "จำเป็น",
-    purchaseFactors: "ราคา",
-    satisfaction: "3",
-    onlinePurchaseIssues: "ไม่สามารถสัมผัสหรือลองสินค้าได้จริง",
-    currentBrand: "Apple",
+    gender: "", // ค่าเริ่มต้น
+    ageRange: "",
+    maritalStatus: "",
+    occupation: "",
+    income: "",
+    apps: [""], // ค่าเริ่มต้นเลือกแอป
+    activities: [""],
+    dailyUsage: "",
+    importance: "",
+    purchaseFactors: "",
+    satisfaction: "",
+    onlinePurchaseIssues: "",
+    currentBrand: "",
   });
 
   const [errorMessage, setErrorMessage] = useState("");
